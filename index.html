@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outreach Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f1f5f9; font-family: 'DM Mono', monospace; color: #1e293b; min-height: 100vh; padding-bottom: 60px; }
+.sg { font-family: 'Space Grotesk', sans-serif; }
+.header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 20px 24px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 20px; }
+.label { font-size: 11px; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+.stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.stat-val { font-family: 'Space Grotesk',sans-serif; font-size: 22px; font-weight: 700; color: #0f172a; }
+.stat-sub { font-size: 10px; color: #cbd5e1; margin-top: 2px; }
+.chart-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 20px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom: 14px; }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #94a3b8; }
+.leg-box { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+canvas { display: block; }
+.progress-bar { height: 6px; background: #f1f5f9; border-radius: 6px; overflow: hidden; margin-top: 14px; }
+.progress-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+
+/* Auto metrics card */
+.auto-metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; margin: 18px 0 14px; }
+.auto-metric {
+  background: #fff; border: 1px solid #e2e8f0; padding: 18px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04); text-align: center;
+}
+.auto-metric:first-child { border-radius: 16px 0 0 16px; }
+.auto-metric:last-child { border-radius: 0 16px 16px 0; }
+.auto-metric:not(:last-child) { border-right: none; }
+.auto-metric .metric-val {
+  font-family: 'Space Grotesk',sans-serif; font-size: 36px; font-weight: 700;
+  line-height: 1; color: #0f172a; transition: color 0.3s;
+}
+.auto-metric .metric-label { font-size: 10px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
+.auto-metric .metric-sub { font-size: 11px; color: #cbd5e1; margin-top: 2px; }
+.auto-metric.loading .metric-val { color: #e2e8f0; }
+
+/* Refresh indicator */
+.refresh-dot {
+  width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+  margin-left: 6px; vertical-align: middle;
+}
+.refresh-dot.ok { background: #86efac; }
+.refresh-dot.loading { background: #fbbf24; animation: pulse 1s infinite; }
+.refresh-dot.error { background: #fca5a5; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.api-banner {
+  background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px;
+  padding: 10px 14px; margin: 14px 0 0; font-size: 11px; color: #92400e;
+  display: none;
+}
+
+/* Week nav */
+.week-nav {
+  display: flex; align-items: center; gap: 8px;
+}
+.week-nav-btn {
+  background: none; border: 1px solid #e2e8f0; border-radius: 6px;
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #64748b; font-size: 14px; font-weight: 700;
+  transition: all 0.15s; font-family: 'Space Grotesk',sans-serif;
+}
+.week-nav-btn:hover { background: #f1f5f9; color: #0f172a; }
+.week-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.week-nav-label { font-size: 11px; color: #64748b; font-family: 'DM Mono',monospace; min-width: 120px; text-align: center; }
+
+/* Trend tabs */
+.tabs { display: flex; gap: 6px; }
+.tab { background: transparent; border: 1px solid #e2e8f0; color: #94a3b8; border-radius: 6px; padding: 4px 12px; font-size: 11px; cursor: pointer; font-family: 'DM Mono',monospace; transition: all 0.15s; }
+.tab.active { background: #0f172a; border-color: #0f172a; color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:640px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="sg" style="font-size:20px;font-weight:700;color:#0f172a">Outreach Tracker</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span id="refreshStatus" class="refresh-dot ok" title="Auto-sync status"></span>
+        <button onclick="fetchAutoData(true)" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;font-size:10px;color:#94a3b8;cursor:pointer;font-family:'DM Mono',monospace" title="Refresh from Sheets">Sync</button>
+      </div>
+    </div>
+    <div id="dateLabel" style="font-size:11px;color:#94a3b8;margin-top:2px"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- TODAY METRICS -->
+  <div class="auto-metrics">
+    <div class="auto-metric loading">
+      <div class="metric-val" id="valOutreach">--</div>
+      <div class="metric-label">New outreach</div>
+      <div class="metric-sub">cold contacts</div>
+    </div>
+    <div class="auto-metric loading">
+      <div class="metric-val" id="valReplies">--</div>
+      <div class="metric-label">Replies</div>
+      <div class="metric-sub" id="subReplies">replied same day</div>
+    </div>
+    <div class="auto-metric loading">
+      <div class="metric-val" id="valTotal">--</div>
+      <div class="metric-label">Total today</div>
+      <div class="metric-sub" id="subTotal">all touches</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="label" style="margin:0">Daily goal</div>
+      <div class="sg" style="font-size:13px;font-weight:700"><span id="goalCurrent">0</span><span style="color:#cbd5e1"> / 20</span></div>
+    </div>
+    <div class="progress-bar" style="margin:0">
+      <div id="progressFill" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
+    </div>
+  </div>
+
+  <div class="api-banner" id="apiBanner">
+    No API connected. Set <code>API_URL</code> in script to enable auto-tracking.
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="label">This week</div>
+      <div id="statWeek" class="stat-val">0</div>
+      <div class="stat-sub" id="statWeekSub">Mon — Sun</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Daily avg</div>
+      <div id="statAvg" class="stat-val">0</div>
+      <div class="stat-sub" id="statAvgSub">this week</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Goal days</div>
+      <div id="statGoal" class="stat-val">0/0</div>
+      <div class="stat-sub">&ge;20 contacts</div>
+    </div>
+  </div>
+
+  <!-- BAR CHART with week navigation -->
+  <div class="chart-card" id="barChartCard">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="label" style="margin:0">Contacts per day</div>
+      <div class="week-nav">
+        <button class="week-nav-btn" onclick="shiftWeek(-1)" id="weekPrev">&larr;</button>
+        <div class="week-nav-label" id="weekLabel">This week</div>
+        <button class="week-nav-btn" onclick="shiftWeek(1)" id="weekNext" disabled>&rarr;</button>
+      </div>
+    </div>
+    <canvas id="barChart" height="150"></canvas>
+    <div class="chart-legend">
+      <div class="leg-item"><span class="leg-box" style="background:#6366f1"></span>Outreach</div>
+      <div class="leg-item"><span class="leg-box" style="background:#10b981"></span>Replies</div>
+      <div class="leg-item" style="margin-left:auto"><span style="border-top:2px dashed #cbd5e1;width:16px;display:inline-block;vertical-align:middle"></span>&nbsp;Goal = 20</div>
+    </div>
+  </div>
+
+  <!-- TREND CHART -->
+  <div class="chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="label" style="margin:0">Trend</div>
+      <div class="tabs">
+        <button class="tab active" onclick="setTrend('daily')">Daily</button>
+        <button class="tab" onclick="setTrend('weekly')">Weekly</button>
+      </div>
+    </div>
+    <canvas id="trendChart" height="160"></canvas>
+    <div class="chart-legend">
+      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#6366f1"></span>Total</div>
+      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#10b981"></span>Replies</div>
+      <div class="leg-item" style="margin-left:auto"><span style="border-top:2px dashed #cbd5e1;width:16px;display:inline-block;vertical-align:middle"></span>&nbsp;Goal</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwo5kxS0ap9nydcJkL5QKdWfIAex4jgrB4rF12FFZ-62gYvFS1cc-bFgx4m4dLC3-AS/exec";
+const AUTO_STORAGE_KEY = "outreach-tracker-auto";
+const GOAL = 20;
+const REFRESH_INTERVAL = 5 * 60 * 1000;
+
+// ============================================================
+// STATE
+// ============================================================
+
+let autoData = {};
+let weekOffset = 0; // 0 = this week, -1 = last week, etc.
+let currentTrend = "daily";
+
+// ============================================================
+// DATE HELPERS
+// ============================================================
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function getMonday(dateStr) {
+  const d = new Date(dateStr + "T12:00:00");
+  const day = d.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  d.setDate(d.getDate() - diff);
+  return d.toISOString().slice(0,10);
+}
+
+// Get full Mon-Sun for a given week offset (0=this week, -1=last week)
+function getWeekDays(offset) {
+  const today = todayKey();
+  const thisMonday = getMonday(today);
+  const d = new Date(thisMonday + "T12:00:00");
+  d.setDate(d.getDate() + offset * 7);
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const copy = new Date(d);
+    copy.setDate(copy.getDate() + i);
+    days.push(copy.toISOString().slice(0,10));
+  }
+  return days;
+}
+
+function getLastNDays(n) {
+  const days = [];
+  for (let i = n-1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  return days;
+}
+
+function getLastNWeeks(n) {
+  const weeks = [];
+  const today = todayKey();
+  const thisMonday = getMonday(today);
+  for (let w = n-1; w >= 0; w--) {
+    const d = new Date(thisMonday + "T12:00:00");
+    d.setDate(d.getDate() - w * 7);
+    const monday = d.toISOString().slice(0,10);
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const dayKey = new Date(d);
+      dayKey.setDate(dayKey.getDate() + i);
+      const key = dayKey.toISOString().slice(0,10);
+      if (key <= today) days.push(key);
+    }
+    const label = d.toLocaleDateString("en", {day:"numeric", month:"short"});
+    weeks.push({ label, days, monday });
+  }
+  return weeks;
+}
+
+function fmtDay(s, mode) {
+  const d = new Date(s + "T12:00:00");
+  if (mode === "weekday") return d.toLocaleDateString("en",{weekday:"short"}).toUpperCase();
+  if (mode === "date") return d.toLocaleDateString("en",{day:"numeric", month:"short"});
+  return d.toLocaleDateString("en",{weekday:"short"}).toUpperCase();
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+
+function loadAutoCache() {
+  try { autoData = JSON.parse(localStorage.getItem(AUTO_STORAGE_KEY)) || {}; } catch(e) { autoData={}; }
+}
+function saveAutoCache() {
+  try { localStorage.setItem(AUTO_STORAGE_KEY, JSON.stringify(autoData)); } catch(e){}
+}
+
+function dayTotal(day) { return autoData[day]?.total || 0; }
+function dayOutreach(day) { return autoData[day]?.newOutreach || 0; }
+function dayReplies(day) { return autoData[day]?.replies || 0; }
+function dayFollowUps(day) { return autoData[day]?.followUps || 0; }
+
+// ============================================================
+// API FETCH
+// ============================================================
+
+function setRefreshStatus(status) {
+  document.getElementById("refreshStatus").className = "refresh-dot " + status;
+}
+
+async function fetchAutoData(forceRefresh) {
+  if (!API_URL) {
+    document.getElementById("apiBanner").style.display = "block";
+    document.querySelectorAll(".auto-metric").forEach(el => {
+      el.classList.remove("loading");
+      el.querySelector(".metric-val").textContent = "--";
+    });
+    return;
+  }
+
+  document.getElementById("apiBanner").style.display = "none";
+  setRefreshStatus("loading");
+
+  try {
+    const todayUrl = API_URL + "?action=todayStats" + (forceRefresh ? "&nocache=1" : "");
+    const [todayRes, historyRes] = await Promise.all([
+      fetch(todayUrl),
+      fetch(API_URL + "?action=history&days=60")
+    ]);
+
+    const todayJson = await todayRes.json();
+    const historyJson = await historyRes.json();
+
+    if (todayJson.success && todayJson.today) {
+      const t = todayJson.today;
+      autoData[t.date] = { newOutreach: t.newOutreach, replies: t.replies, followUps: t.followUps, total: t.total };
+    }
+
+    if (historyJson.success && historyJson.history) {
+      historyJson.history.forEach(entry => {
+        autoData[entry.date] = { newOutreach: entry.newOutreach, replies: entry.replies, followUps: entry.followUps, total: entry.total };
+      });
+    }
+
+    saveAutoCache();
+    setRefreshStatus("ok");
+  } catch (err) {
+    console.error("API fetch error:", err);
+    setRefreshStatus("error");
+  }
+
+  render();
+}
+
+// ============================================================
+// WEEK NAVIGATION
+// ============================================================
+
+function shiftWeek(dir) {
+  weekOffset += dir;
+  if (weekOffset > 0) weekOffset = 0;
+  document.getElementById("weekNext").disabled = weekOffset >= 0;
+  render();
+}
+
+// ============================================================
+// TREND TOGGLE
+// ============================================================
+
+function setTrend(v) {
+  currentTrend = v;
+  document.querySelectorAll(".chart-card:last-of-type .tab").forEach((t,i) =>
+    t.classList.toggle("active", (i===0&&v==="daily")||(i===1&&v==="weekly")));
+  renderCharts();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+
+function render() {
+  const today = todayKey();
+  const td = autoData[today];
+
+  // Date
+  document.getElementById("dateLabel").textContent =
+    new Date().toLocaleDateString("en",{weekday:"long",day:"numeric",month:"long"});
+
+  // Auto metrics
+  document.querySelectorAll(".auto-metric").forEach(el => el.classList.remove("loading"));
+
+  const outreach = td?.newOutreach ?? 0;
+  const replies = td?.replies ?? 0;
+  const followUps = td?.followUps ?? 0;
+  const total = td?.total ?? 0;
+
+  const valOut = document.getElementById("valOutreach");
+  valOut.textContent = outreach;
+  valOut.style.color = outreach > 0 ? "#0f172a" : "#cbd5e1";
+
+  const valRep = document.getElementById("valReplies");
+  valRep.textContent = replies;
+  valRep.style.color = replies > 0 ? "#10b981" : "#cbd5e1";
+
+  document.getElementById("subReplies").textContent =
+    outreach > 0 ? replies + " of " + outreach + " replied" : "replied same day";
+
+  const valTotal = document.getElementById("valTotal");
+  valTotal.textContent = total;
+  valTotal.style.color = total >= GOAL ? "#10b981" : "#0f172a";
+
+  const totalParts = [];
+  if (outreach > 0) totalParts.push(outreach + " new");
+  if (followUps > 0) totalParts.push(followUps + " follow-up");
+  document.getElementById("subTotal").textContent =
+    total >= GOAL ? "goal reached!" : totalParts.length > 0 ? totalParts.join(" + ") : (GOAL - total) + " to goal";
+
+  // Progress
+  const pct = Math.min(100, Math.round(total / GOAL * 100));
+  document.getElementById("goalCurrent").textContent = total;
+  const fill = document.getElementById("progressFill");
+  fill.style.width = pct + "%";
+  fill.style.background = pct >= 100 ? "#10b981" : "linear-gradient(90deg,#6366f1,#8b5cf6)";
+
+  // Stats — current week (Mon-Sun)
+  const weekDays = getWeekDays(0);
+  const daysUpToToday = weekDays.filter(d => d <= today);
+  const weekTotal = daysUpToToday.reduce((s,d) => s + dayTotal(d), 0);
+  const weekWorkedDays = daysUpToToday.length;
+  const weekAvg = weekWorkedDays > 0 ? Math.round(weekTotal / weekWorkedDays) : 0;
+  const weekGoalDays = daysUpToToday.filter(d => dayTotal(d) >= GOAL).length;
+
+  document.getElementById("statWeek").textContent = weekTotal;
+  const monday = new Date(weekDays[0] + "T12:00:00");
+  const sunday = new Date(weekDays[6] + "T12:00:00");
+  document.getElementById("statWeekSub").textContent =
+    monday.toLocaleDateString("en",{day:"numeric",month:"short"}) + " — " +
+    sunday.toLocaleDateString("en",{day:"numeric",month:"short"});
+
+  document.getElementById("statAvg").textContent = weekAvg;
+  document.getElementById("statAvgSub").textContent = "this week";
+  document.getElementById("statGoal").textContent = weekGoalDays + "/" + weekWorkedDays;
+
+  // Week nav label
+  const navDays = getWeekDays(weekOffset);
+  const navMon = new Date(navDays[0] + "T12:00:00");
+  const navSun = new Date(navDays[6] + "T12:00:00");
+  document.getElementById("weekLabel").textContent = weekOffset === 0 ? "This week" :
+    navMon.toLocaleDateString("en",{day:"numeric",month:"short"}) + " — " +
+    navSun.toLocaleDateString("en",{day:"numeric",month:"short"});
+  document.getElementById("weekNext").disabled = weekOffset >= 0;
+
+  renderCharts();
+}
+
+// ============================================================
+// BAR CHART
+// ============================================================
+
+function renderBar() {
+  const canvas = document.getElementById("barChart");
+  const dayList = getWeekDays(weekOffset);
+  const today = todayKey();
+
+  canvas.width = canvas.parentElement.clientWidth - 40;
+  canvas.height = 150;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const totalVals = dayList.map(d => d <= today ? dayTotal(d) : 0);
+  const replyVals = dayList.map(d => d <= today ? dayReplies(d) : 0);
+  const maxVal = Math.max(GOAL + 2, ...totalVals);
+  const padL=32, padR=10, padT=10, padB=30;
+  const chartW=W-padL-padR, chartH=H-padT-padB;
+  const gap = chartW/7;
+  const barW = gap * 0.6;
+
+  // Y-axis labels
+  ctx.fillStyle="#94a3b8"; ctx.font="9px DM Mono"; ctx.textAlign="right";
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + chartH*(i/4);
+    const val = Math.round(maxVal * (1 - i/4));
+    ctx.fillText(val, padL - 5, y + 3);
+    // Grid line
+    ctx.strokeStyle="#f1f5f9"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+  }
+
+  // Goal line
+  const goalY = padT + chartH - (GOAL/maxVal)*chartH;
+  ctx.setLineDash([4,3]);
+  ctx.strokeStyle="#cbd5e1"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(padL,goalY); ctx.lineTo(W-padR,goalY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  dayList.forEach((day,i) => {
+    const totalV = totalVals[i];
+    const replyV = replyVals[i];
+    const x = padL + i*gap + gap/2 - barW/2;
+    const r = Math.min(5, barW/2);
+    const isFuture = day > today;
+    const isToday = day === today;
+
+    if (isFuture) {
+      // Future day — subtle placeholder
+      ctx.fillStyle="#f1f5f9";
+      ctx.fillRect(x, padT+chartH-2, barW, 2);
+    } else if (totalV === 0) {
+      ctx.fillStyle="#e2e8f0";
+      ctx.fillRect(x, padT+chartH-2, barW, 2);
+    } else {
+      const totalH = (totalV/maxVal)*chartH;
+      const totalY = padT+chartH-totalH;
+      const replyH = (replyV/maxVal)*chartH;
+
+      // Full bar — indigo
+      ctx.fillStyle = isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc");
+      ctx.beginPath();
+      ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
+      ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
+      ctx.lineTo(x+barW, padT+chartH); ctx.lineTo(x, padT+chartH);
+      ctx.lineTo(x, totalY+r);
+      ctx.quadraticCurveTo(x, totalY, x+r, totalY);
+      ctx.fill();
+
+      // Reply overlay — green (top portion)
+      if (replyV > 0) {
+        ctx.fillStyle = isToday ? "#10b981" : "#34d399";
+        ctx.beginPath();
+        ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
+        ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
+        ctx.lineTo(x+barW, totalY+replyH); ctx.lineTo(x, totalY+replyH);
+        ctx.lineTo(x, totalY+r);
+        ctx.quadraticCurveTo(x, totalY, x+r, totalY);
+        ctx.fill();
+      }
+
+      // Value on top of bar
+      if (totalV > 0) {
+        ctx.fillStyle = isToday ? "#0f172a" : "#64748b";
+        ctx.font = "bold 10px Space Grotesk"; ctx.textAlign = "center";
+        ctx.fillText(totalV, x+barW/2, totalY - 4);
+      }
+    }
+
+    // Day label
+    ctx.fillStyle = isFuture ? "#cbd5e1" : (isToday ? "#0f172a" : "#94a3b8");
+    ctx.font = "10px DM Mono"; ctx.textAlign = "center";
+    ctx.fillText(fmtDay(day, "weekday"), x+barW/2, H-10);
+  });
+}
+
+// ============================================================
+// TREND CHART
+// ============================================================
+
+function renderTrend() {
+  const canvas = document.getElementById("trendChart");
+  canvas.width = canvas.parentElement.clientWidth - 40;
+  canvas.height = 160;
+  const ctx = canvas.getContext("2d");
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const padL=32, padR=10, padT=10, padB=30;
+  const chartW=W-padL-padR, chartH=H-padT-padB;
+  const today = todayKey();
+
+  let points, labels;
+
+  if (currentTrend === "daily") {
+    const dayList = getLastNDays(14);
+    points = dayList.map(d => ({ total: dayTotal(d), replies: dayReplies(d) }));
+    labels = dayList.map((d,i) => i % 3 === 0 ? fmtDay(d, "date") : "");
+  } else {
+    const weeks = getLastNWeeks(8);
+    points = weeks.map(w => ({
+      total: w.days.reduce((s,d) => s + dayTotal(d), 0),
+      replies: w.days.reduce((s,d) => s + dayReplies(d), 0)
+    }));
+    labels = weeks.map(w => w.label);
+  }
+
+  const n = points.length;
+  if (n === 0) return;
+
+  const maxVal = Math.max(
+    currentTrend === "daily" ? GOAL + 2 : GOAL * 7 + 10,
+    ...points.map(p => p.total)
+  );
+
+  // Grid lines + Y-axis
+  ctx.strokeStyle="#f1f5f9"; ctx.lineWidth=1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + chartH*(i/4);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    const val = Math.round(maxVal * (1 - i/4));
+    ctx.fillStyle="#94a3b8"; ctx.font="9px DM Mono"; ctx.textAlign="right";
+    ctx.fillText(val, padL - 5, y + 3);
+  }
+
+  // Goal line
+  const goalVal = currentTrend === "daily" ? GOAL : GOAL * 7;
+  if (goalVal <= maxVal) {
+    const goalY = padT + chartH - (goalVal/maxVal)*chartH;
+    ctx.setLineDash([4,3]);
+    ctx.strokeStyle="#cbd5e1"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padL,goalY); ctx.lineTo(W-padR,goalY); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawLine(color, width, getData) {
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = "round";
+    ctx.beginPath();
+    points.forEach((p,i) => {
+      const x = n === 1 ? padL + chartW/2 : padL + i*(chartW/(n-1));
+      const y = padT + chartH - (getData(p)/maxVal)*chartH;
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.fillStyle = color;
+    points.forEach((p,i) => {
+      const x = n === 1 ? padL + chartW/2 : padL + i*(chartW/(n-1));
+      const y = padT + chartH - (getData(p)/maxVal)*chartH;
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  drawLine("#6366f1", 2.5, p => p.total);
+  drawLine("#10b981", 2, p => p.replies);
+
+  // X labels
+  ctx.fillStyle="#94a3b8"; ctx.font="9px DM Mono"; ctx.textAlign="center";
+  labels.forEach((label,i) => {
+    if (!label) return;
+    const x = n === 1 ? padL + chartW/2 : padL + i*(chartW/(n-1));
+    ctx.fillText(label, x, H-10);
+  });
+}
+
+function renderCharts() { renderBar(); renderTrend(); }
+
+// ============================================================
+// INIT
+// ============================================================
+
+loadAutoCache();
+render();
+fetchAutoData();
+setInterval(fetchAutoData, REFRESH_INTERVAL);
+window.addEventListener("resize", () => renderCharts());
+</script>
+</body>
+</html>
