@@ -79,17 +79,10 @@ canvas { display: block; }
 </head>
 <body>
 
-<div class="header">
-  <div style="max-width:640px;margin:0 auto">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div class="sg" style="font-size:20px;font-weight:700;color:#0f172a">Communication Tracker</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="refreshStatus" class="refresh-dot ok" title="Auto-sync status"></span>
-        <button onclick="fetchAutoData(true)" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;font-size:10px;color:#94a3b8;cursor:pointer;font-family:'DM Mono',monospace" title="Refresh from Sheets">Sync</button>
-      </div>
-    </div>
-    <div id="dateLabel" style="font-size:11px;color:#94a3b8;margin-top:2px"></div>
-  </div>
+<div style="max-width:640px;margin:0 auto;padding:8px 20px 0;display:flex;align-items:center;gap:8px">
+  <div id="dateLabel" style="font-size:11px;color:#94a3b8"></div>
+  <span id="refreshStatus" class="refresh-dot ok" title="Auto-sync status"></span>
+  <button onclick="fetchAutoData(true)" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:2px 8px;font-size:10px;color:#94a3b8;cursor:pointer;font-family:'DM Mono',monospace" title="Refresh from Sheets">Sync</button>
 </div>
 
 <div class="wrap">
