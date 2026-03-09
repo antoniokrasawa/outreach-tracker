@@ -75,6 +75,74 @@ canvas { display: block; }
 .tabs { display: flex; gap: 6px; }
 .tab { background: transparent; border: 1px solid #e2e8f0; color: #94a3b8; border-radius: 6px; padding: 4px 12px; font-size: 11px; cursor: pointer; font-family: 'DM Mono',monospace; transition: all 0.15s; }
 .tab.active { background: #0f172a; border-color: #0f172a; color: #fff; }
+
+/* Tab navigation */
+.tab-nav { display: flex; gap: 0; margin: 10px 0 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+.tab-nav-btn { flex: 1; background: transparent; border: none; padding: 10px 0; font-size: 12px; font-family: 'DM Mono', monospace; color: #94a3b8; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px; }
+.tab-nav-btn.active { background: #0f172a; color: #fff; }
+.tab-nav-btn:not(:last-child) { border-right: 1px solid #e2e8f0; }
+
+/* Pipeline */
+.pipeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin: 14px 0; }
+.pipeline-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
+.pipeline-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.pipeline-card .pipe-status { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+.pipeline-card .pipe-count { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: #0f172a; line-height: 1; }
+.pipeline-card .pipe-delta { font-size: 10px; margin-top: 4px; }
+.pipe-delta.up { color: #10b981; }
+.pipe-delta.down { color: #ef4444; }
+.pipe-delta.flat { color: #94a3b8; }
+
+.token-bar { display: flex; gap: 6px; align-items: center; }
+.token-bar input { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 12px; font-family: 'DM Mono', monospace; background: #fff; color: #1e293b; outline: none; }
+.token-bar input:focus { border-color: #6366f1; }
+.token-bar button { border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; background: #fff; color: #64748b; white-space: nowrap; }
+.token-bar button:hover { background: #f8fafc; border-color: #cbd5e1; }
+.token-bar .btn-primary { background: #0f172a; color: #fff; border-color: #0f172a; }
+.token-bar .btn-primary:hover { background: #1e293b; }
+.token-bar .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+.pipeline-table-wrap { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+.pipeline-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.pipeline-table th { text-align: center; padding: 6px 3px; color: #94a3b8; font-weight: 400; font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
+.pipeline-table th:first-child { text-align: left; }
+.pipeline-table td { text-align: center; padding: 8px 3px; border-top: 1px solid #f1f5f9; white-space: nowrap; }
+.pipeline-table td:first-child { text-align: left; font-size: 10px; color: #64748b; }
+.pipeline-table .cell-count { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: #0f172a; }
+.pipeline-table .cell-delta { font-size: 9px; }
+
+.pipeline-loading { text-align: center; padding: 40px 0; color: #94a3b8; font-size: 12px; }
+
+.trans-table { width: 100%; border-collapse: collapse; }
+.trans-table th { text-align: left; padding: 6px 8px; color: #94a3b8; font-weight: 400; font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+.trans-table th:last-child { text-align: right; }
+.trans-table td { padding: 8px 8px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+.trans-table td:last-child { text-align: right; }
+.trans-table tr:last-child td { border-bottom: none; }
+.trans-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+.trans-arrow { color: #cbd5e1; font-size: 14px; padding: 0 2px; }
+.trans-count { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: #0f172a; }
+.trans-summary { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+.trans-summary-item { font-size: 11px; color: #64748b; }
+.trans-summary-item span { font-family: 'Space Grotesk', sans-serif; font-weight: 600; color: #0f172a; }
+.trans-empty { text-align: center; padding: 24px 0; color: #cbd5e1; font-size: 12px; }
+
+.flow-stage { position: relative; }
+.flow-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.flow-bar { height: 4px; border-radius: 2px; flex: 1; background: #f1f5f9; position: relative; overflow: hidden; }
+.flow-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.flow-name { font-size: 11px; font-weight: 500; min-width: 80px; }
+.flow-count { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: #0f172a; min-width: 30px; text-align: right; }
+.flow-net { font-size: 11px; font-weight: 600; min-width: 32px; text-align: right; }
+.flow-moves { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px 6px; }
+.flow-chip { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; }
+.flow-chip.in { background: #ecfdf5; color: #059669; }
+.flow-chip.out { background: #fef2f2; color: #dc2626; }
+.flow-arrow-down { text-align: center; padding: 2px 0; font-size: 12px; line-height: 1; }
+.flow-arrow-num { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 11px; color: #0f172a; }
+.flow-arrow-icon { color: #cbd5e1; font-size: 10px; }
+.flow-empty { text-align: center; padding: 30px 0; color: #cbd5e1; font-size: 12px; }
+.flow-info { font-size: 10px; color: #94a3b8; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
 </style>
 </head>
 <body>
@@ -85,6 +153,14 @@ canvas { display: block; }
   <button onclick="fetchAutoData(true)" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:2px 8px;font-size:10px;color:#94a3b8;cursor:pointer;font-family:'DM Mono',monospace" title="Refresh from Sheets">Sync</button>
 </div>
 
+<div class="wrap" style="margin-bottom:0;padding-bottom:0">
+  <div class="tab-nav">
+    <button class="tab-nav-btn active" onclick="switchTab('outreach')">Communications</button>
+    <button class="tab-nav-btn" onclick="switchTab('pipeline')">Pipeline</button>
+  </div>
+</div>
+
+<div id="tab-outreach">
 <div class="wrap">
 
   <!-- TODAY METRICS -->
@@ -176,6 +252,50 @@ canvas { display: block; }
   </div>
 
 </div>
+</div><!-- /tab-outreach -->
+
+<div id="tab-pipeline" style="display:none">
+<div class="wrap">
+
+  <!-- TOKEN INPUT (hidden once saved) -->
+  <div style="margin-top:14px">
+    <div class="token-bar" id="tokenBar" style="display:none">
+      <input type="password" id="clickupToken" placeholder="ClickUp API Token (pk_...)" />
+      <button class="btn-primary" onclick="savePipelineToken()">Save</button>
+    </div>
+    <div class="token-bar" id="tokenSaved" style="display:none">
+      <button onclick="fetchPipelineData()" style="font-size:10px;padding:2px 8px">Sync now</button>
+      <span id="pipelineStatus" class="status-dot" style="background:#cbd5e1" title="Not loaded"></span>
+    </div>
+    <div id="pipelineProgress" style="display:none;margin-top:8px">
+      <div class="progress-bar"><div id="pipelineProgressFill" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div></div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:4px" id="pipelineProgressLabel"></div>
+    </div>
+  </div>
+
+  <!-- CURRENT SNAPSHOT -->
+  <div class="label" style="margin:18px 0 8px">Current pipeline</div>
+  <div class="pipeline-grid" id="pipelineFunnel"></div>
+
+  <!-- PIPELINE FLOW -->
+  <div class="chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="label" style="margin:0">Pipeline flow</div>
+      <div class="tabs" id="pipelinePeriodTabs">
+        <button class="tab active" onclick="setPipelinePeriod('weekly')">Weeks</button>
+        <button class="tab" onclick="setPipelinePeriod('monthly')">Months</button>
+      </div>
+    </div>
+    <div class="week-nav" style="margin-bottom:14px">
+      <button class="week-nav-btn" onclick="shiftPipePeriod(-1)" id="pipePrev">&larr;</button>
+      <div class="week-nav-label" id="pipePeriodLabel">-</div>
+      <button class="week-nav-btn" onclick="shiftPipePeriod(1)" id="pipeNext" disabled>&rarr;</button>
+    </div>
+    <div id="pipelineFlow"></div>
+  </div>
+
+</div>
+</div><!-- /tab-pipeline -->
 
 <script>
 // ============================================================
@@ -629,7 +749,539 @@ loadAutoCache();
 render();
 fetchAutoData();
 setInterval(fetchAutoData, REFRESH_INTERVAL);
-window.addEventListener("resize", () => renderCharts());
+window.addEventListener("resize", function() { renderCharts(); });
+
+// ============================================================
+// PIPELINE TAB
+// ============================================================
+
+var PIPELINE_LISTS = ['901514562753', '901514329955', '901519872188'];
+// All statuses discovered dynamically from tasks — no hardcoded list
+var KNOWN_STATUS_COLORS = {
+  'connected': '#3b82f6', 'negotiation': '#f59e0b',
+  'to close': '#8b5cf6', 'registered': '#ec4899', 'launch': '#f97316',
+  'active partner': '#10b981', 'hold': '#06b6d4', 'rejected': '#ef4444'
+};
+// Statuses to hide from cards and flow (noise, not useful for pipeline)
+var HIDDEN_STATUSES = ['new', 'not relevant', 'no contact', 'contacted', 'tested not profitable', 'tested / not profitable', 'active another manager', 'active (another manager)', 'inactive', 'fraud'];
+var FALLBACK_COLORS = ['#6366f1','#14b8a6','#e11d48','#a855f7','#ea580c','#0ea5e9','#84cc16','#d946ef'];
+var PIPE_DATA_KEY = 'pipeline-data-v4';
+var PIPE_TOKEN_KEY = 'pipeline-clickup-token';
+var MAX_SNAPSHOTS = 60;
+var PIPE_AUTO_INTERVAL = 30 * 60 * 1000; // 30 min auto-sync
+var pipeAutoTimer = null;
+
+// State
+var pipeData = { snapshot: {}, snapshots: [], allStatuses: [] };
+var pipePeriod = 'weekly';
+var pipePeriodOffset = 0;
+var pipeLoading = false;
+var pipeActiveTab = false; // is Pipeline tab currently visible
+
+function loadPipeData() {
+  try {
+    var raw = JSON.parse(localStorage.getItem(PIPE_DATA_KEY));
+    pipeData = raw && raw.snapshots ? raw : { snapshot: {}, snapshots: [], allStatuses: [] };
+    if (!pipeData.allStatuses) pipeData.allStatuses = [];
+  } catch(e) { pipeData = { snapshot: {}, snapshots: [], allStatuses: [] }; }
+}
+function savePipeData() {
+  // Trim old snapshots
+  if (pipeData.snapshots.length > MAX_SNAPSHOTS) {
+    pipeData.snapshots = pipeData.snapshots.slice(-MAX_SNAPSHOTS);
+  }
+  try { localStorage.setItem(PIPE_DATA_KEY, JSON.stringify(pipeData)); } catch(e) { console.error('Storage full'); }
+}
+
+function getPipeToken() { return localStorage.getItem(PIPE_TOKEN_KEY) || ''; }
+function savePipelineToken() {
+  var val = document.getElementById('clickupToken').value.trim();
+  if (val) {
+    localStorage.setItem(PIPE_TOKEN_KEY, val);
+    document.getElementById('tokenBar').style.display = 'none';
+    document.getElementById('tokenSaved').style.display = 'flex';
+    startPipeAutoSync();
+  }
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-outreach').style.display = tab === 'outreach' ? '' : 'none';
+  document.getElementById('tab-pipeline').style.display = tab === 'pipeline' ? '' : 'none';
+  document.querySelectorAll('.tab-nav-btn').forEach(function(btn, i) {
+    btn.classList.toggle('active', (i === 0 && tab === 'outreach') || (i === 1 && tab === 'pipeline'));
+  });
+  pipeActiveTab = (tab === 'pipeline');
+  if (tab === 'pipeline') {
+    loadPipeData();
+    var token = getPipeToken();
+    if (token) {
+      document.getElementById('tokenBar').style.display = 'none';
+      document.getElementById('tokenSaved').style.display = 'flex';
+    } else {
+      document.getElementById('tokenBar').style.display = 'flex';
+      document.getElementById('tokenSaved').style.display = 'none';
+    }
+    renderPipeline();
+    startPipeAutoSync();
+  } else {
+    stopPipeAutoSync();
+  }
+}
+
+function startPipeAutoSync() {
+  stopPipeAutoSync();
+  var token = getPipeToken();
+  if (!token) return;
+  // Auto-fetch on tab open if no snapshots or last snapshot > 30 min old
+  var snaps = pipeData.snapshots;
+  var shouldFetch = !snaps || snaps.length === 0 ||
+    (Date.now() - snaps[snaps.length - 1].ts > PIPE_AUTO_INTERVAL);
+  if (shouldFetch && !pipeLoading) fetchPipelineData();
+  pipeAutoTimer = setInterval(function() {
+    if (pipeActiveTab && !pipeLoading) fetchPipelineData();
+  }, PIPE_AUTO_INTERVAL);
+}
+
+function stopPipeAutoSync() {
+  if (pipeAutoTimer) { clearInterval(pipeAutoTimer); pipeAutoTimer = null; }
+}
+
+// ============================================================
+// FETCH: snapshot-based (no time_in_status)
+// ============================================================
+
+function setPipeProgress(pct, label) {
+  var wrap = document.getElementById('pipelineProgress');
+  var fill = document.getElementById('pipelineProgressFill');
+  var lbl = document.getElementById('pipelineProgressLabel');
+  wrap.style.display = pct >= 0 ? '' : 'none';
+  fill.style.width = Math.round(pct) + '%';
+  lbl.textContent = label || '';
+}
+
+async function fetchPipelineData() {
+  var token = getPipeToken();
+  if (!token) { alert('Enter your ClickUp API token first'); return; }
+
+  pipeLoading = true;
+  var dot = document.getElementById('pipelineStatus');
+  dot.style.background = '#fbbf24'; dot.title = 'Loading...';
+  renderPipeline();
+  setPipeProgress(0, 'Fetching tasks...');
+
+  try {
+    var allTasks = [];
+    var statusCounts = {};
+
+    for (var li = 0; li < PIPELINE_LISTS.length; li++) {
+      var page = 0, hasMore = true;
+      while (hasMore) {
+        var url = 'https://api.clickup.com/api/v2/list/' + PIPELINE_LISTS[li] + '/task?page=' + page + '&subtasks=false&include_closed=true';
+        var res = await fetch(url, { headers: { 'Authorization': token } });
+        if (!res.ok) throw new Error('Tasks API error: ' + res.status);
+        var data = await res.json();
+        if (data.tasks && data.tasks.length > 0) {
+          data.tasks.forEach(function(t) {
+            var st = t.status && t.status.status ? t.status.status.toLowerCase() : '';
+            if (!st) return;
+            allTasks.push({ id: t.id, status: st });
+            statusCounts[st] = (statusCounts[st] || 0) + 1;
+          });
+          hasMore = data.tasks.length >= 100;
+          page++;
+        } else { hasMore = false; }
+      }
+      setPipeProgress(30 + li * 25, 'List ' + (li + 1) + '/' + PIPELINE_LISTS.length + ' (' + allTasks.length + ' tasks)');
+    }
+
+    // Discover all statuses, sorted by count descending
+    var discoveredStatuses = Object.keys(statusCounts).sort(function(a, b) {
+      return statusCounts[b] - statusCounts[a];
+    });
+
+    pipeData.snapshot = statusCounts;
+    pipeData.allStatuses = discoveredStatuses;
+
+    // Save per-task snapshot
+    var taskStatuses = {};
+    allTasks.forEach(function(t) { taskStatuses[t.id] = t.status; });
+
+    pipeData.snapshots.push({ ts: Date.now(), tasks: taskStatuses });
+
+    // Keep max N snapshots
+    if (pipeData.snapshots.length > MAX_SNAPSHOTS) {
+      pipeData.snapshots = pipeData.snapshots.slice(-MAX_SNAPSHOTS);
+    }
+
+    savePipeData();
+
+    pipeLoading = false;
+    dot.style.background = '#86efac';
+    var snapshotCount = pipeData.snapshots.length;
+    dot.title = allTasks.length + ' tasks, ' + discoveredStatuses.length + ' statuses, ' + snapshotCount + ' snapshot' + (snapshotCount > 1 ? 's' : '') + ' at ' + new Date().toLocaleTimeString();
+    setPipeProgress(-1);
+    renderPipeline();
+  } catch (err) {
+    pipeLoading = false;
+    dot.style.background = '#fca5a5';
+    dot.title = 'Error: ' + err.message;
+    setPipeProgress(-1);
+    console.error('Pipeline fetch error:', err);
+    alert('Error: ' + err.message);
+    renderPipeline();
+  }
+}
+
+// ============================================================
+// PERIOD HELPERS (Thu-Wed weeks, calendar months)
+// ============================================================
+
+function getPipeThursday(dateStr) {
+  var d = new Date(dateStr + 'T12:00:00');
+  var day = d.getDay();
+  var diff = day >= 4 ? day - 4 : day + 3;
+  d.setDate(d.getDate() - diff);
+  return d;
+}
+
+function getPipePeriod(offset) {
+  var today = todayKey();
+  if (pipePeriod === 'weekly') {
+    var thu = getPipeThursday(today);
+    thu.setDate(thu.getDate() + offset * 7);
+    var wed = new Date(thu);
+    wed.setDate(wed.getDate() + 6);
+    var startMs = new Date(thu.getFullYear(), thu.getMonth(), thu.getDate()).getTime();
+    var endMs = new Date(wed.getFullYear(), wed.getMonth(), wed.getDate(), 23, 59, 59, 999).getTime();
+    var label = thu.toLocaleDateString('en', { day: 'numeric', month: 'short' }) + ' - ' + wed.toLocaleDateString('en', { day: 'numeric', month: 'short' });
+    return { startMs: startMs, endMs: endMs, label: label };
+  } else {
+    var now = new Date(today + 'T12:00:00');
+    var d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    var lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    var startMs = d.getTime();
+    var endMs = new Date(lastDay.getFullYear(), lastDay.getMonth(), lastDay.getDate(), 23, 59, 59, 999).getTime();
+    var label = d.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+    return { startMs: startMs, endMs: endMs, label: label };
+  }
+}
+
+function shiftPipePeriod(dir) {
+  pipePeriodOffset += dir;
+  if (pipePeriodOffset > 0) pipePeriodOffset = 0;
+  document.getElementById('pipeNext').disabled = pipePeriodOffset >= 0;
+  renderPipeline();
+}
+
+function setPipelinePeriod(p) {
+  pipePeriod = p;
+  pipePeriodOffset = 0;
+  document.querySelectorAll('#pipelinePeriodTabs .tab').forEach(function(t, i) {
+    t.classList.toggle('active', (i === 0 && p === 'weekly') || (i === 1 && p === 'monthly'));
+  });
+  document.getElementById('pipeNext').disabled = true;
+  renderPipeline();
+}
+
+// ============================================================
+// SNAPSHOT COMPARISON: compute flows between two snapshots
+// ============================================================
+
+// Find the best pair of snapshots for a period.
+// startSnap = latest snapshot BEFORE the period (baseline).
+// endSnap = latest snapshot WITHIN the period (or after, for current period).
+// Returns null if we don't have data covering this period.
+function getSnapshotPair(periodStartMs, periodEndMs) {
+  var snaps = pipeData.snapshots;
+  if (!snaps || snaps.length < 2) return null;
+
+  // startSnap: latest snapshot with ts <= periodStartMs (baseline before period)
+  // If none exists, use earliest snapshot IF it's within the period (first-ever snapshot)
+  var startSnap = null;
+  for (var i = 0; i < snaps.length; i++) {
+    if (snaps[i].ts <= periodStartMs) startSnap = snaps[i];
+  }
+
+  // endSnap: latest snapshot within [periodStartMs, periodEndMs]
+  // For current period (endMs >= now), also accept the most recent snapshot
+  var endSnap = null;
+  var now = Date.now();
+  for (var i = 0; i < snaps.length; i++) {
+    if (snaps[i].ts >= periodStartMs && snaps[i].ts <= periodEndMs) {
+      endSnap = snaps[i];
+    }
+  }
+  // If current period extends to future and no snap in period yet, use latest
+  if (!endSnap && periodEndMs >= now) {
+    endSnap = snaps[snaps.length - 1];
+  }
+
+  if (!endSnap) return null; // no data for this period at all
+
+  // If no baseline before period, use first snapshot in the period as start
+  // (shows changes within the period only)
+  if (!startSnap) {
+    // Find the first snapshot in or before the period
+    for (var i = 0; i < snaps.length; i++) {
+      if (snaps[i].ts <= periodEndMs) { startSnap = snaps[i]; break; }
+    }
+  }
+
+  if (!startSnap || !endSnap) return null;
+  if (startSnap.ts === endSnap.ts) return null; // same snapshot, no diff
+  if (startSnap.ts > endSnap.ts) return null; // shouldn't happen
+
+  return { start: startSnap, end: endSnap };
+}
+
+// Compute per-status flows from snapshot pair — all statuses, no filtering
+function computeFlows(pair) {
+  if (!pair) return null;
+
+  var startTasks = pair.start.tasks;
+  var endTasks = pair.end.tasks;
+
+  // Discover all statuses across both snapshots
+  var allStatusSet = {};
+  for (var id in startTasks) allStatusSet[startTasks[id]] = true;
+  for (var id in endTasks) allStatusSet[endTasks[id]] = true;
+
+  var flows = {};
+  for (var s in allStatusSet) {
+    flows[s] = { inflows: {}, outflows: {}, countStart: 0, countEnd: 0 };
+  }
+
+  // Count per status
+  for (var id in endTasks) {
+    var st = endTasks[id];
+    if (flows[st]) flows[st].countEnd++;
+  }
+  for (var id in startTasks) {
+    var st = startTasks[id];
+    if (flows[st]) flows[st].countStart++;
+  }
+
+  // Find all task IDs in either snapshot
+  var allIds = {};
+  for (var id in startTasks) allIds[id] = true;
+  for (var id in endTasks) allIds[id] = true;
+
+  // Compare
+  for (var id in allIds) {
+    var fromSt = startTasks[id] || null;
+    var toSt = endTasks[id] || null;
+
+    if (fromSt === toSt) continue;
+
+    // Record outflow
+    if (fromSt && flows[fromSt] && toSt) {
+      if (!flows[fromSt].outflows[toSt]) flows[fromSt].outflows[toSt] = 0;
+      flows[fromSt].outflows[toSt]++;
+    }
+
+    // Record inflow
+    if (toSt && flows[toSt]) {
+      var src = fromSt || '(new)';
+      if (!flows[toSt].inflows[src]) flows[toSt].inflows[src] = 0;
+      flows[toSt].inflows[src]++;
+    }
+  }
+
+  return flows;
+}
+
+// ============================================================
+// RENDER PIPELINE
+// ============================================================
+
+function statusLabel(s) {
+  if (s === '(new)') return '(new)';
+  // Capitalize each word
+  return s.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+}
+
+var _dynamicColorIdx = 0;
+var _assignedColors = {};
+function statusColor(s) {
+  if (KNOWN_STATUS_COLORS[s]) return KNOWN_STATUS_COLORS[s];
+  if (_assignedColors[s]) return _assignedColors[s];
+  _assignedColors[s] = FALLBACK_COLORS[_dynamicColorIdx % FALLBACK_COLORS.length];
+  _dynamicColorIdx++;
+  return _assignedColors[s];
+}
+
+function isHiddenStatus(s) {
+  return HIDDEN_STATUSES.indexOf(s) !== -1;
+}
+
+// Get ordered list of statuses for rendering (excluding hidden)
+function getDisplayStatuses() {
+  var statuses = pipeData.allStatuses;
+  if (!statuses || statuses.length === 0) {
+    statuses = Object.keys(pipeData.snapshot || {});
+  }
+  if (statuses.length === 0) return [];
+  var order = ['connected', 'negotiation', 'to close', 'registered', 'launch', 'active partner', 'hold', 'rejected'];
+  var snap = pipeData.snapshot || {};
+  return statuses.filter(function(s) { return !isHiddenStatus(s); }).sort(function(a, b) {
+    var ia = order.indexOf(a), ib = order.indexOf(b);
+    if (ia === -1) ia = 100;
+    if (ib === -1) ib = 100;
+    if (ia !== ib) return ia - ib;
+    return (snap[b] || 0) - (snap[a] || 0);
+  });
+}
+
+function renderPipeline() {
+  var snapshot = pipeData.snapshot || {};
+  var hasSnapshots = pipeData.snapshots && pipeData.snapshots.length > 0;
+  var displayStatuses = getDisplayStatuses();
+
+  // -- Snapshot cards (all statuses) --
+  var funnelEl = document.getElementById('pipelineFunnel');
+  if (pipeLoading) {
+    funnelEl.innerHTML = '<div class="pipeline-loading" style="grid-column:1/-1">Loading from ClickUp...</div>';
+  } else if (displayStatuses.length === 0) {
+    funnelEl.innerHTML = '<div class="pipeline-loading" style="grid-column:1/-1;color:#cbd5e1">No data yet</div>';
+  } else {
+    var html = '';
+    displayStatuses.forEach(function(status) {
+      var color = statusColor(status);
+      var count = snapshot[status] || 0;
+      html += '<div class="pipeline-card" style="border-top:3px solid ' + color + '">';
+      html += '<div class="pipe-status" style="color:' + color + '">' + statusLabel(status) + '</div>';
+      html += '<div class="pipe-count">' + count + '</div>';
+      html += '</div>';
+    });
+    funnelEl.innerHTML = html;
+  }
+
+  // -- Period label --
+  var period = getPipePeriod(pipePeriodOffset);
+  document.getElementById('pipePeriodLabel').textContent = pipePeriodOffset === 0 ? 'Current: ' + period.label : period.label;
+  document.getElementById('pipeNext').disabled = pipePeriodOffset >= 0;
+
+  // -- Pipeline flow --
+  var flowEl = document.getElementById('pipelineFlow');
+
+  if (!hasSnapshots) {
+    flowEl.innerHTML = '<div class="flow-empty">Waiting for first sync from ClickUp...</div>';
+    return;
+  }
+
+  var pair = getSnapshotPair(period.startMs, period.endMs);
+
+  if (!pair) {
+    var snapshotCount = pipeData.snapshots.length;
+    flowEl.innerHTML = '<div class="flow-empty">' +
+      (snapshotCount < 2
+        ? 'Need at least 2 snapshots to show flow. Auto-sync every 30 min, or click <b>Load</b>.'
+        : 'No snapshot data for this period.') +
+      '</div>' +
+      '<div class="flow-info">' + snapshotCount + ' snapshot' + (snapshotCount !== 1 ? 's' : '') + ' saved. ' +
+      'First: ' + new Date(pipeData.snapshots[0].ts).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) +
+      ', Last: ' + new Date(pipeData.snapshots[snapshotCount - 1].ts).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) +
+      '</div>';
+    return;
+  }
+
+  var flows = computeFlows(pair);
+  if (!flows) {
+    flowEl.innerHTML = '<div class="flow-empty">Could not compute flows for this period.</div>';
+    return;
+  }
+
+  // Get all statuses that appear in flows, sorted by display order (excluding hidden)
+  var flowStatuses = Object.keys(flows).filter(function(s) { return !isHiddenStatus(s); });
+  var order = ['connected', 'negotiation', 'to close', 'registered', 'launch', 'active partner', 'hold', 'rejected'];
+  flowStatuses.sort(function(a, b) {
+    var ia = order.indexOf(a), ib = order.indexOf(b);
+    if (ia === -1) ia = 100;
+    if (ib === -1) ib = 100;
+    if (ia !== ib) return ia - ib;
+    return (flows[b].countEnd || 0) - (flows[a].countEnd || 0);
+  });
+
+  // Find max count for bar scaling
+  var maxCount = 1;
+  flowStatuses.forEach(function(s) {
+    var c = Math.max(flows[s].countStart, flows[s].countEnd);
+    if (c > maxCount) maxCount = c;
+  });
+
+  // Count total transitions
+  var totalTransitions = 0;
+  flowStatuses.forEach(function(s) {
+    for (var k in flows[s].inflows) totalTransitions += flows[s].inflows[k];
+  });
+
+  var fhtml = '';
+
+  if (totalTransitions === 0) {
+    fhtml += '<div class="flow-empty">No status changes detected in this period.</div>';
+  } else {
+    flowStatuses.forEach(function(status, idx) {
+      var f = flows[status];
+      var color = statusColor(status);
+      var totalIn = 0, totalOut = 0;
+
+      for (var k in f.inflows) totalIn += f.inflows[k];
+      for (var k in f.outflows) totalOut += f.outflows[k];
+
+      // Skip statuses with zero movement and zero count (reduce noise)
+      if (totalIn === 0 && totalOut === 0 && f.countEnd === 0) return;
+
+      var net = totalIn - totalOut;
+      var barPct = Math.max(4, Math.round((f.countEnd / maxCount) * 100));
+
+      fhtml += '<div class="flow-stage">';
+      fhtml += '<div class="flow-header">';
+      fhtml += '<div class="flow-name" style="color:' + color + '">' + statusLabel(status) + '</div>';
+      fhtml += '<div class="flow-bar"><div class="flow-bar-fill" style="width:' + barPct + '%;background:' + color + '"></div></div>';
+      fhtml += '<div class="flow-count">' + f.countEnd + '</div>';
+
+      if (net > 0) fhtml += '<div class="flow-net" style="color:#10b981">+' + net + '</div>';
+      else if (net < 0) fhtml += '<div class="flow-net" style="color:#ef4444">' + net + '</div>';
+      else if (totalIn > 0 || totalOut > 0) fhtml += '<div class="flow-net" style="color:#94a3b8">=</div>';
+      else fhtml += '<div class="flow-net"></div>';
+
+      fhtml += '</div>';
+
+      // Inflow/outflow chips
+      if (totalIn > 0 || totalOut > 0) {
+        fhtml += '<div class="flow-moves">';
+
+        var inKeys = Object.keys(f.inflows).sort(function(a, b) { return f.inflows[b] - f.inflows[a]; });
+        inKeys.forEach(function(src) {
+          fhtml += '<span class="flow-chip in">+' + f.inflows[src] + ' from ' + statusLabel(src) + '</span>';
+        });
+
+        var outKeys = Object.keys(f.outflows).sort(function(a, b) { return f.outflows[b] - f.outflows[a]; });
+        outKeys.forEach(function(dst) {
+          fhtml += '<span class="flow-chip out">-' + f.outflows[dst] + ' to ' + statusLabel(dst) + '</span>';
+        });
+
+        fhtml += '</div>';
+      }
+
+      fhtml += '</div>';
+    });
+  }
+
+  // Snapshot info
+  fhtml += '<div class="flow-info">';
+  fhtml += 'Comparing: ' + new Date(pair.start.ts).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  fhtml += ' vs ' + new Date(pair.end.ts).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  fhtml += ' | ' + totalTransitions + ' transition' + (totalTransitions !== 1 ? 's' : '');
+  fhtml += ' | ' + pipeData.snapshots.length + ' snapshots total';
+  fhtml += ' | Auto-sync every 30 min';
+  fhtml += '</div>';
+
+  flowEl.innerHTML = fhtml;
+}
+
+// Init
+loadPipeData();
 </script>
 </body>
 </html>
