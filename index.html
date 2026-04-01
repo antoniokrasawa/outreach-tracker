@@ -164,11 +164,16 @@ canvas { display: block; }
 <div class="wrap">
 
   <!-- TODAY METRICS -->
-  <div class="auto-metrics">
+  <div class="auto-metrics" style="grid-template-columns:repeat(4,1fr)">
     <div class="auto-metric loading">
       <div class="metric-val" id="valOutreach">--</div>
-      <div class="metric-label">New outreach</div>
+      <div class="metric-label">Outreach</div>
       <div class="metric-sub">cold contacts</div>
+    </div>
+    <div class="auto-metric loading">
+      <div class="metric-val" id="valFollowUps">--</div>
+      <div class="metric-label">Follow-ups</div>
+      <div class="metric-sub" id="subFollowUps">existing leads</div>
     </div>
     <div class="auto-metric loading">
       <div class="metric-val" id="valReplies">--</div>
@@ -177,7 +182,7 @@ canvas { display: block; }
     </div>
     <div class="auto-metric loading">
       <div class="metric-val" id="valTotal">--</div>
-      <div class="metric-label">Total today</div>
+      <div class="metric-label">Total</div>
       <div class="metric-sub" id="subTotal">all touches</div>
     </div>
   </div>
@@ -229,6 +234,7 @@ canvas { display: block; }
     <canvas id="barChart" height="150"></canvas>
     <div class="chart-legend">
       <div class="leg-item"><span class="leg-box" style="background:#6366f1"></span>Outreach</div>
+      <div class="leg-item"><span class="leg-box" style="background:#f59e0b"></span>Follow-ups</div>
       <div class="leg-item"><span class="leg-box" style="background:#10b981"></span>Replies</div>
       <div class="leg-item" style="margin-left:auto"><span style="border-top:2px dashed #cbd5e1;width:16px;display:inline-block;vertical-align:middle"></span>&nbsp;Goal = 20</div>
     </div>
@@ -245,7 +251,8 @@ canvas { display: block; }
     </div>
     <canvas id="trendChart" height="160"></canvas>
     <div class="chart-legend">
-      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#6366f1"></span>Total</div>
+      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#6366f1"></span>Outreach</div>
+      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#f59e0b"></span>Follow-ups</div>
       <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#10b981"></span>Replies</div>
       <div class="leg-item" style="margin-left:auto"><span style="border-top:2px dashed #cbd5e1;width:16px;display:inline-block;vertical-align:middle"></span>&nbsp;Goal</div>
     </div>
@@ -496,7 +503,13 @@ function render() {
 
   const valOut = document.getElementById("valOutreach");
   valOut.textContent = outreach;
-  valOut.style.color = outreach > 0 ? "#0f172a" : "#cbd5e1";
+  valOut.style.color = outreach > 0 ? "#6366f1" : "#cbd5e1";
+
+  const valFU = document.getElementById("valFollowUps");
+  valFU.textContent = followUps;
+  valFU.style.color = followUps > 0 ? "#f59e0b" : "#cbd5e1";
+  document.getElementById("subFollowUps").textContent =
+    followUps > 0 ? followUps + " existing" : "existing leads";
 
   const valRep = document.getElementById("valReplies");
   valRep.textContent = replies;
@@ -568,8 +581,10 @@ function renderBar() {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0,0,W,H);
 
-  const totalVals = dayList.map(d => d <= today ? dayTotal(d) : 0);
+  const outreachVals = dayList.map(d => d <= today ? dayOutreach(d) : 0);
+  const followUpVals = dayList.map(d => d <= today ? dayFollowUps(d) : 0);
   const replyVals = dayList.map(d => d <= today ? dayReplies(d) : 0);
+  const totalVals = dayList.map(d => d <= today ? dayTotal(d) : 0);
   const maxVal = Math.max(GOAL + 2, ...totalVals);
   const padL=32, padR=10, padT=10, padB=30;
   const chartW=W-padL-padR, chartH=H-padT-padB;
@@ -596,6 +611,8 @@ function renderBar() {
 
   dayList.forEach((day,i) => {
     const totalV = totalVals[i];
+    const outV = outreachVals[i];
+    const fuV = followUpVals[i];
     const replyV = replyVals[i];
     const x = padL + i*gap + gap/2 - barW/2;
     const r = Math.min(5, barW/2);
@@ -603,7 +620,6 @@ function renderBar() {
     const isToday = day === today;
 
     if (isFuture) {
-      // Future day — subtle placeholder
       ctx.fillStyle="#f1f5f9";
       ctx.fillRect(x, padT+chartH-2, barW, 2);
     } else if (totalV === 0) {
@@ -612,28 +628,51 @@ function renderBar() {
     } else {
       const totalH = (totalV/maxVal)*chartH;
       const totalY = padT+chartH-totalH;
+      const outH = (outV/maxVal)*chartH;
+      const fuH = (fuV/maxVal)*chartH;
       const replyH = (replyV/maxVal)*chartH;
 
-      // Full bar — indigo
-      ctx.fillStyle = isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc");
-      ctx.beginPath();
-      ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
-      ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
-      ctx.lineTo(x+barW, padT+chartH); ctx.lineTo(x, padT+chartH);
-      ctx.lineTo(x, totalY+r);
-      ctx.quadraticCurveTo(x, totalY, x+r, totalY);
-      ctx.fill();
+      // Bottom: Outreach (indigo)
+      if (outV > 0) {
+        ctx.fillStyle = isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc");
+        ctx.beginPath();
+        if (fuV === 0) {
+          // Outreach is the full bar — rounded top
+          ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
+          ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
+        } else {
+          // Outreach is bottom — flat top
+          ctx.moveTo(x, padT+chartH-outH); ctx.lineTo(x+barW, padT+chartH-outH);
+        }
+        ctx.lineTo(x+barW, padT+chartH); ctx.lineTo(x, padT+chartH);
+        if (fuV === 0) {
+          ctx.lineTo(x, totalY+r);
+          ctx.quadraticCurveTo(x, totalY, x+r, totalY);
+        } else {
+          ctx.lineTo(x, padT+chartH-outH);
+        }
+        ctx.fill();
+      }
 
-      // Reply overlay — green (top portion)
-      if (replyV > 0) {
-        ctx.fillStyle = isToday ? "#10b981" : "#34d399";
+      // Top: Follow-ups (amber) — stacked above outreach
+      if (fuV > 0) {
+        ctx.fillStyle = isToday ? "#f59e0b" : "#fbbf24";
         ctx.beginPath();
         ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
         ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
-        ctx.lineTo(x+barW, totalY+replyH); ctx.lineTo(x, totalY+replyH);
+        ctx.lineTo(x+barW, totalY+fuH); ctx.lineTo(x, totalY+fuH);
         ctx.lineTo(x, totalY+r);
         ctx.quadraticCurveTo(x, totalY, x+r, totalY);
         ctx.fill();
+      }
+
+      // Reply markers — green dots on the bar
+      if (replyV > 0) {
+        ctx.fillStyle = isToday ? "#10b981" : "#34d399";
+        const dotY = totalY + 10;
+        ctx.beginPath(); ctx.arc(x+barW/2, dotY, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.font = "bold 7px Space Grotesk"; ctx.textAlign = "center";
+        ctx.fillText(replyV, x+barW/2, dotY + 2.5);
       }
 
       // Value on top of bar
@@ -671,12 +710,13 @@ function renderTrend() {
 
   if (currentTrend === "daily") {
     const dayList = getLastNDays(14);
-    points = dayList.map(d => ({ total: dayTotal(d), replies: dayReplies(d) }));
+    points = dayList.map(d => ({ outreach: dayOutreach(d), followUps: dayFollowUps(d), replies: dayReplies(d) }));
     labels = dayList.map((d,i) => i % 3 === 0 ? fmtDay(d, "date") : "");
   } else {
     const weeks = getLastNWeeks(8);
     points = weeks.map(w => ({
-      total: w.days.reduce((s,d) => s + dayTotal(d), 0),
+      outreach: w.days.reduce((s,d) => s + dayOutreach(d), 0),
+      followUps: w.days.reduce((s,d) => s + dayFollowUps(d), 0),
       replies: w.days.reduce((s,d) => s + dayReplies(d), 0)
     }));
     labels = weeks.map(w => w.label);
@@ -687,7 +727,7 @@ function renderTrend() {
 
   const maxVal = Math.max(
     currentTrend === "daily" ? GOAL + 2 : GOAL * 7 + 10,
-    ...points.map(p => p.total)
+    ...points.map(p => p.outreach + p.followUps)
   );
 
   // Grid lines + Y-axis
@@ -727,7 +767,8 @@ function renderTrend() {
     });
   }
 
-  drawLine("#6366f1", 2.5, p => p.total);
+  drawLine("#6366f1", 2.5, p => p.outreach);
+  drawLine("#f59e0b", 2, p => p.followUps);
   drawLine("#10b981", 2, p => p.replies);
 
   // X labels
