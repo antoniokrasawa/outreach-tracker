@@ -623,10 +623,20 @@ function renderBar() {
       const fuH = (fuV/maxVal)*chartH;
       const repH = (replyV/maxVal)*chartH;
 
-      // Stack from bottom: outreach → follow-ups → replies
+      // Stack from bottom: other → outreach → follow-ups → replies
+      const otherV = Math.max(0, totalV - outV - fuV - replyV);
+      const otherH = (otherV/maxVal)*chartH;
       let curY = padT + chartH; // start at bottom
 
-      // Bottom: Outreach (indigo)
+      // Bottom: Other contacts (light gray — inbound, conference, etc.)
+      if (otherV > 0) {
+        const segTop = curY - otherH;
+        ctx.fillStyle = isToday ? "#94a3b8" : "#cbd5e1";
+        ctx.fillRect(x, segTop, barW, otherH);
+        curY = segTop;
+      }
+
+      // Outreach (indigo)
       if (outV > 0) {
         const segTop = curY - outH;
         ctx.fillStyle = isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc");
@@ -634,7 +644,7 @@ function renderBar() {
         curY = segTop;
       }
 
-      // Middle: Follow-ups (amber)
+      // Follow-ups (amber)
       if (fuV > 0) {
         const segTop = curY - fuH;
         ctx.fillStyle = isToday ? "#f59e0b" : "#fbbf24";
@@ -650,16 +660,17 @@ function renderBar() {
         curY = segTop;
       }
 
-      // Rounded top cap on the whole bar
-      const barTop = padT + chartH - totalH;
-      ctx.fillStyle = replyV > 0 ? (isToday ? "#10b981" : "#34d399") :
-                      fuV > 0 ? (isToday ? "#f59e0b" : "#fbbf24") :
-                      (isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc"));
+      // Rounded top cap
+      const barTop = curY;
+      const topColor = replyV > 0 ? (isToday ? "#10b981" : "#34d399") :
+                       fuV > 0 ? (isToday ? "#f59e0b" : "#fbbf24") :
+                       outV > 0 ? (isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc")) :
+                       (isToday ? "#94a3b8" : "#cbd5e1");
+      ctx.fillStyle = topColor;
       ctx.beginPath();
       ctx.moveTo(x+r, barTop); ctx.lineTo(x+barW-r, barTop);
       ctx.quadraticCurveTo(x+barW, barTop, x+barW, barTop+r);
       ctx.lineTo(x+barW, barTop+r); ctx.lineTo(x, barTop+r);
-      ctx.lineTo(x, barTop+r);
       ctx.quadraticCurveTo(x, barTop, x+r, barTop);
       ctx.fill();
 
@@ -667,7 +678,7 @@ function renderBar() {
       if (totalV > 0) {
         ctx.fillStyle = isToday ? "#0f172a" : "#64748b";
         ctx.font = "bold 10px Space Grotesk"; ctx.textAlign = "center";
-        ctx.fillText(totalV, x+barW/2, barTop - 4);
+        ctx.fillText(totalV, x+barW/2, curY - 4);
       }
     }
 
