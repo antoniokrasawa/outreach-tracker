@@ -264,20 +264,11 @@ canvas { display: block; }
 <div id="tab-pipeline" style="display:none">
 <div class="wrap">
 
-  <!-- TOKEN INPUT (hidden once saved) -->
-  <div style="margin-top:14px">
-    <div class="token-bar" id="tokenBar" style="display:none">
-      <input type="password" id="clickupToken" placeholder="ClickUp API Token (pk_...)" />
-      <button class="btn-primary" onclick="savePipelineToken()">Save</button>
-    </div>
-    <div class="token-bar" id="tokenSaved" style="display:none">
-      <button onclick="fetchPipelineData()" style="font-size:10px;padding:2px 8px">Sync now</button>
-      <span id="pipelineStatus" class="status-dot" style="background:#cbd5e1" title="Not loaded"></span>
-    </div>
-    <div id="pipelineProgress" style="display:none;margin-top:8px">
-      <div class="progress-bar"><div id="pipelineProgressFill" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div></div>
-      <div style="font-size:10px;color:#94a3b8;margin-top:4px" id="pipelineProgressLabel"></div>
-    </div>
+  <!-- PIPELINE CONTROLS -->
+  <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
+    <button onclick="syncPipelineNow()" style="border:1px solid #e2e8f0;border-radius:8px;padding:4px 12px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;background:#fff;color:#64748b">Sync now</button>
+    <span id="pipelineStatus" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:#cbd5e1" title="Not loaded"></span>
+    <span id="pipelineInfo" style="font-size:10px;color:#94a3b8"></span>
   </div>
 
   <!-- CURRENT SNAPSHOT -->
@@ -793,54 +784,20 @@ window.addEventListener("resize", function() { renderCharts(); });
 // PIPELINE TAB
 // ============================================================
 
-var PIPELINE_LISTS = ['901514562753', '901514329955', '901519872188'];
-// All statuses discovered dynamically from tasks — no hardcoded list
 var KNOWN_STATUS_COLORS = {
   'connected': '#3b82f6', 'negotiation': '#f59e0b',
   'to close': '#8b5cf6', 'registered': '#ec4899', 'launch': '#f97316',
   'active partner': '#10b981', 'hold': '#06b6d4', 'rejected': '#ef4444'
 };
-// Statuses to hide from cards and flow (noise, not useful for pipeline)
 var HIDDEN_STATUSES = ['new', 'not relevant', 'no contact', 'contacted', 'tested not profitable', 'tested / not profitable', 'active another manager', 'active (another manager)', 'inactive', 'fraud'];
 var FALLBACK_COLORS = ['#6366f1','#14b8a6','#e11d48','#a855f7','#ea580c','#0ea5e9','#84cc16','#d946ef'];
-var PIPE_DATA_KEY = 'pipeline-data-v4';
-var PIPE_TOKEN_KEY = 'pipeline-clickup-token';
-var MAX_SNAPSHOTS = 60;
-var PIPE_AUTO_INTERVAL = 30 * 60 * 1000; // 30 min auto-sync
-var pipeAutoTimer = null;
+var MAX_SNAPSHOTS = 90;
 
 // State
 var pipeData = { snapshot: {}, snapshots: [], allStatuses: [] };
 var pipePeriod = 'weekly';
 var pipePeriodOffset = 0;
 var pipeLoading = false;
-var pipeActiveTab = false; // is Pipeline tab currently visible
-
-function loadPipeData() {
-  try {
-    var raw = JSON.parse(localStorage.getItem(PIPE_DATA_KEY));
-    pipeData = raw && raw.snapshots ? raw : { snapshot: {}, snapshots: [], allStatuses: [] };
-    if (!pipeData.allStatuses) pipeData.allStatuses = [];
-  } catch(e) { pipeData = { snapshot: {}, snapshots: [], allStatuses: [] }; }
-}
-function savePipeData() {
-  // Trim old snapshots
-  if (pipeData.snapshots.length > MAX_SNAPSHOTS) {
-    pipeData.snapshots = pipeData.snapshots.slice(-MAX_SNAPSHOTS);
-  }
-  try { localStorage.setItem(PIPE_DATA_KEY, JSON.stringify(pipeData)); } catch(e) { console.error('Storage full'); }
-}
-
-function getPipeToken() { return localStorage.getItem(PIPE_TOKEN_KEY) || ''; }
-function savePipelineToken() {
-  var val = document.getElementById('clickupToken').value.trim();
-  if (val) {
-    localStorage.setItem(PIPE_TOKEN_KEY, val);
-    document.getElementById('tokenBar').style.display = 'none';
-    document.getElementById('tokenSaved').style.display = 'flex';
-    startPipeAutoSync();
-  }
-}
 
 function switchTab(tab) {
   document.getElementById('tab-outreach').style.display = tab === 'outreach' ? '' : 'none';
@@ -848,124 +805,85 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-nav-btn').forEach(function(btn, i) {
     btn.classList.toggle('active', (i === 0 && tab === 'outreach') || (i === 1 && tab === 'pipeline'));
   });
-  pipeActiveTab = (tab === 'pipeline');
   if (tab === 'pipeline') {
-    loadPipeData();
-    var token = getPipeToken();
-    if (token) {
-      document.getElementById('tokenBar').style.display = 'none';
-      document.getElementById('tokenSaved').style.display = 'flex';
-    } else {
-      document.getElementById('tokenBar').style.display = 'flex';
-      document.getElementById('tokenSaved').style.display = 'none';
-    }
-    renderPipeline();
-    startPipeAutoSync();
-  } else {
-    stopPipeAutoSync();
+    fetchPipelineData();
   }
 }
 
-function startPipeAutoSync() {
-  stopPipeAutoSync();
-  var token = getPipeToken();
-  if (!token) return;
-  // Auto-fetch on tab open if no snapshots or last snapshot > 30 min old
-  var snaps = pipeData.snapshots;
-  var shouldFetch = !snaps || snaps.length === 0 ||
-    (Date.now() - snaps[snaps.length - 1].ts > PIPE_AUTO_INTERVAL);
-  if (shouldFetch && !pipeLoading) fetchPipelineData();
-  pipeAutoTimer = setInterval(function() {
-    if (pipeActiveTab && !pipeLoading) fetchPipelineData();
-  }, PIPE_AUTO_INTERVAL);
-}
-
-function stopPipeAutoSync() {
-  if (pipeAutoTimer) { clearInterval(pipeAutoTimer); pipeAutoTimer = null; }
-}
-
 // ============================================================
-// FETCH: snapshot-based (no time_in_status)
+// FETCH: server-side pipeline via API
 // ============================================================
-
-function setPipeProgress(pct, label) {
-  var wrap = document.getElementById('pipelineProgress');
-  var fill = document.getElementById('pipelineProgressFill');
-  var lbl = document.getElementById('pipelineProgressLabel');
-  wrap.style.display = pct >= 0 ? '' : 'none';
-  fill.style.width = Math.round(pct) + '%';
-  lbl.textContent = label || '';
-}
 
 async function fetchPipelineData() {
-  var token = getPipeToken();
-  if (!token) { alert('Enter your ClickUp API token first'); return; }
-
+  if (pipeLoading) return;
   pipeLoading = true;
   var dot = document.getElementById('pipelineStatus');
   dot.style.background = '#fbbf24'; dot.title = 'Loading...';
+  document.getElementById('pipelineInfo').textContent = 'Loading...';
   renderPipeline();
-  setPipeProgress(0, 'Fetching tasks...');
 
   try {
-    var allTasks = [];
-    var statusCounts = {};
+    var res = await fetch(API_URL + '?action=pipeline');
+    var json = await res.json();
 
-    for (var li = 0; li < PIPELINE_LISTS.length; li++) {
-      var page = 0, hasMore = true;
-      while (hasMore) {
-        var url = 'https://api.clickup.com/api/v2/list/' + PIPELINE_LISTS[li] + '/task?page=' + page + '&subtasks=false&include_closed=true';
-        var res = await fetch(url, { headers: { 'Authorization': token } });
-        if (!res.ok) throw new Error('Tasks API error: ' + res.status);
-        var data = await res.json();
-        if (data.tasks && data.tasks.length > 0) {
-          data.tasks.forEach(function(t) {
-            var st = t.status && t.status.status ? t.status.status.toLowerCase() : '';
-            if (!st) return;
-            allTasks.push({ id: t.id, status: st });
-            statusCounts[st] = (statusCounts[st] || 0) + 1;
-          });
-          hasMore = data.tasks.length >= 100;
-          page++;
-        } else { hasMore = false; }
-      }
-      setPipeProgress(30 + li * 25, 'List ' + (li + 1) + '/' + PIPELINE_LISTS.length + ' (' + allTasks.length + ' tasks)');
-    }
+    if (!json.success || !json.pipeline) throw new Error(json.error || 'API error');
 
-    // Discover all statuses, sorted by count descending
-    var discoveredStatuses = Object.keys(statusCounts).sort(function(a, b) {
-      return statusCounts[b] - statusCounts[a];
-    });
-
-    pipeData.snapshot = statusCounts;
-    pipeData.allStatuses = discoveredStatuses;
-
-    // Save per-task snapshot
-    var taskStatuses = {};
-    allTasks.forEach(function(t) { taskStatuses[t.id] = t.status; });
-
-    pipeData.snapshots.push({ ts: Date.now(), tasks: taskStatuses });
-
-    // Keep max N snapshots
-    if (pipeData.snapshots.length > MAX_SNAPSHOTS) {
-      pipeData.snapshots = pipeData.snapshots.slice(-MAX_SNAPSHOTS);
-    }
-
-    savePipeData();
+    var pipeline = json.pipeline;
+    pipeData.snapshot = pipeline.currentCounts || {};
+    pipeData.allStatuses = pipeline.allStatuses || [];
+    pipeData.snapshots = pipeline.snapshots || [];
 
     pipeLoading = false;
     dot.style.background = '#86efac';
     var snapshotCount = pipeData.snapshots.length;
-    dot.title = allTasks.length + ' tasks, ' + discoveredStatuses.length + ' statuses, ' + snapshotCount + ' snapshot' + (snapshotCount > 1 ? 's' : '') + ' at ' + new Date().toLocaleTimeString();
-    setPipeProgress(-1);
+    var info = snapshotCount + ' snapshots';
+    if (snapshotCount > 0) {
+      info += ' | Last: ' + new Date(pipeData.snapshots[snapshotCount - 1].ts).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+    info += ' | Auto-sync daily';
+    dot.title = info;
+    document.getElementById('pipelineInfo').textContent = info;
     renderPipeline();
   } catch (err) {
     pipeLoading = false;
     dot.style.background = '#fca5a5';
     dot.title = 'Error: ' + err.message;
-    setPipeProgress(-1);
+    document.getElementById('pipelineInfo').textContent = 'Error: ' + err.message;
     console.error('Pipeline fetch error:', err);
-    alert('Error: ' + err.message);
+    renderPipeline();
+  }
+}
+
+async function syncPipelineNow() {
+  if (pipeLoading) return;
+  pipeLoading = true;
+  var dot = document.getElementById('pipelineStatus');
+  dot.style.background = '#fbbf24'; dot.title = 'Syncing...';
+  document.getElementById('pipelineInfo').textContent = 'Syncing from ClickUp (~30 sec)...';
+
+  try {
+    var res = await fetch(API_URL + '?action=pipelineSync');
+    var json = await res.json();
+
+    if (!json.success) throw new Error(json.error || 'Sync error');
+
+    var pipeline = json.pipeline;
+    pipeData.snapshot = pipeline.currentCounts || {};
+    pipeData.allStatuses = pipeline.allStatuses || [];
+    pipeData.snapshots = pipeline.snapshots || [];
+
+    pipeLoading = false;
+    dot.style.background = '#86efac';
+    var snapshotCount = pipeData.snapshots.length;
+    document.getElementById('pipelineInfo').textContent = 'Synced! ' + snapshotCount + ' snapshots | ' + (json.newSnapshot ? json.newSnapshot.totalTasks + ' tasks' : '');
+    dot.title = 'Synced at ' + new Date().toLocaleTimeString();
+    renderPipeline();
+  } catch (err) {
+    pipeLoading = false;
+    dot.style.background = '#fca5a5';
+    dot.title = 'Error: ' + err.message;
+    document.getElementById('pipelineInfo').textContent = 'Error: ' + err.message;
+    console.error('Pipeline sync error:', err);
     renderPipeline();
   }
 }
@@ -1312,14 +1230,13 @@ function renderPipeline() {
   fhtml += ' vs ' + new Date(pair.end.ts).toLocaleDateString('en', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   fhtml += ' | ' + totalTransitions + ' transition' + (totalTransitions !== 1 ? 's' : '');
   fhtml += ' | ' + pipeData.snapshots.length + ' snapshots total';
-  fhtml += ' | Auto-sync every 30 min';
+  fhtml += ' | Auto-sync daily (server-side)';
   fhtml += '</div>';
 
   flowEl.innerHTML = fhtml;
 }
 
-// Init
-loadPipeData();
+
 </script>
 </body>
 </html>
