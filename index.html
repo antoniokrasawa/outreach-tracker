@@ -630,56 +630,53 @@ function renderBar() {
       const totalY = padT+chartH-totalH;
       const outH = (outV/maxVal)*chartH;
       const fuH = (fuV/maxVal)*chartH;
-      const replyH = (replyV/maxVal)*chartH;
+      const repH = (replyV/maxVal)*chartH;
+
+      // Stack from bottom: outreach → follow-ups → replies
+      let curY = padT + chartH; // start at bottom
 
       // Bottom: Outreach (indigo)
       if (outV > 0) {
+        const segTop = curY - outH;
         ctx.fillStyle = isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc");
-        ctx.beginPath();
-        if (fuV === 0) {
-          // Outreach is the full bar — rounded top
-          ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
-          ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
-        } else {
-          // Outreach is bottom — flat top
-          ctx.moveTo(x, padT+chartH-outH); ctx.lineTo(x+barW, padT+chartH-outH);
-        }
-        ctx.lineTo(x+barW, padT+chartH); ctx.lineTo(x, padT+chartH);
-        if (fuV === 0) {
-          ctx.lineTo(x, totalY+r);
-          ctx.quadraticCurveTo(x, totalY, x+r, totalY);
-        } else {
-          ctx.lineTo(x, padT+chartH-outH);
-        }
-        ctx.fill();
+        ctx.fillRect(x, segTop, barW, outH);
+        curY = segTop;
       }
 
-      // Top: Follow-ups (amber) — stacked above outreach
+      // Middle: Follow-ups (amber)
       if (fuV > 0) {
+        const segTop = curY - fuH;
         ctx.fillStyle = isToday ? "#f59e0b" : "#fbbf24";
-        ctx.beginPath();
-        ctx.moveTo(x+r, totalY); ctx.lineTo(x+barW-r, totalY);
-        ctx.quadraticCurveTo(x+barW, totalY, x+barW, totalY+r);
-        ctx.lineTo(x+barW, totalY+fuH); ctx.lineTo(x, totalY+fuH);
-        ctx.lineTo(x, totalY+r);
-        ctx.quadraticCurveTo(x, totalY, x+r, totalY);
-        ctx.fill();
+        ctx.fillRect(x, segTop, barW, fuH);
+        curY = segTop;
       }
 
-      // Reply markers — green dots on the bar
+      // Top: Replies (green)
       if (replyV > 0) {
+        const segTop = curY - repH;
         ctx.fillStyle = isToday ? "#10b981" : "#34d399";
-        const dotY = totalY + 10;
-        ctx.beginPath(); ctx.arc(x+barW/2, dotY, 4, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#fff"; ctx.font = "bold 7px Space Grotesk"; ctx.textAlign = "center";
-        ctx.fillText(replyV, x+barW/2, dotY + 2.5);
+        ctx.fillRect(x, segTop, barW, repH);
+        curY = segTop;
       }
+
+      // Rounded top cap on the whole bar
+      const barTop = padT + chartH - totalH;
+      ctx.fillStyle = replyV > 0 ? (isToday ? "#10b981" : "#34d399") :
+                      fuV > 0 ? (isToday ? "#f59e0b" : "#fbbf24") :
+                      (isToday ? "#6366f1" : (totalV >= GOAL ? "#818cf8" : "#a5b4fc"));
+      ctx.beginPath();
+      ctx.moveTo(x+r, barTop); ctx.lineTo(x+barW-r, barTop);
+      ctx.quadraticCurveTo(x+barW, barTop, x+barW, barTop+r);
+      ctx.lineTo(x+barW, barTop+r); ctx.lineTo(x, barTop+r);
+      ctx.lineTo(x, barTop+r);
+      ctx.quadraticCurveTo(x, barTop, x+r, barTop);
+      ctx.fill();
 
       // Value on top of bar
       if (totalV > 0) {
         ctx.fillStyle = isToday ? "#0f172a" : "#64748b";
         ctx.font = "bold 10px Space Grotesk"; ctx.textAlign = "center";
-        ctx.fillText(totalV, x+barW/2, totalY - 4);
+        ctx.fillText(totalV, x+barW/2, barTop - 4);
       }
     }
 
