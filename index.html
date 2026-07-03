@@ -50,6 +50,13 @@ canvas { display: block; }
 .refresh-dot.loading { background: #fbbf24; animation: pulse 1s infinite; }
 .refresh-dot.error { background: #fca5a5; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+/* Manual add button on metric cards */
+.manual-add {
+  margin-top: 6px; padding: 2px 8px; font-size: 11px; line-height: 1.4;
+  color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0;
+  border-radius: 6px; cursor: pointer;
+}
+.manual-add:hover { background: #e2e8f0; color: #334155; }
 
 .api-banner {
   background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px;
@@ -169,16 +176,19 @@ canvas { display: block; }
       <div class="metric-val" id="valOutreach">--</div>
       <div class="metric-label">Outreach</div>
       <div class="metric-sub">cold contacts</div>
+      <button class="manual-add" onclick="manualAdd('outreach')">+ manual</button>
     </div>
     <div class="auto-metric loading">
       <div class="metric-val" id="valFollowUps">--</div>
       <div class="metric-label">Follow-ups</div>
       <div class="metric-sub" id="subFollowUps">existing leads</div>
+      <button class="manual-add" onclick="manualAdd('followup')">+ manual</button>
     </div>
     <div class="auto-metric loading">
       <div class="metric-val" id="valReplies">--</div>
-      <div class="metric-label">Replies</div>
-      <div class="metric-sub" id="subReplies">replied same day</div>
+      <div class="metric-label">New Contact Reply</div>
+      <div class="metric-sub" id="subReplies">new contact, same day</div>
+      <button class="manual-add" onclick="manualAdd('reply')">+ manual</button>
     </div>
     <div class="auto-metric loading">
       <div class="metric-val" id="valTotal">--</div>
@@ -235,7 +245,7 @@ canvas { display: block; }
     <div class="chart-legend">
       <div class="leg-item"><span class="leg-box" style="background:#6366f1"></span>Outreach</div>
       <div class="leg-item"><span class="leg-box" style="background:#f59e0b"></span>Follow-ups</div>
-      <div class="leg-item"><span class="leg-box" style="background:#10b981"></span>Replies</div>
+      <div class="leg-item"><span class="leg-box" style="background:#10b981"></span>New reply</div>
       <div class="leg-item" style="margin-left:auto"><span style="border-top:2px dashed #cbd5e1;width:16px;display:inline-block;vertical-align:middle"></span>&nbsp;Goal = 20</div>
     </div>
   </div>
@@ -253,7 +263,7 @@ canvas { display: block; }
     <div class="chart-legend">
       <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#6366f1"></span>Outreach</div>
       <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#f59e0b"></span>Follow-ups</div>
-      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#10b981"></span>Replies</div>
+      <div class="leg-item"><span style="width:16px;height:3px;border-radius:2px;display:inline-block;background:#10b981"></span>New reply</div>
       <div class="leg-item" style="margin-left:auto"><span style="border-top:2px dashed #cbd5e1;width:16px;display:inline-block;vertical-align:middle"></span>&nbsp;Goal</div>
     </div>
   </div>
@@ -450,6 +460,29 @@ async function fetchAutoData(forceRefresh) {
   render();
 }
 
+// Manually add touches to today's stats (repeat emails etc. that bypass
+// the sheets/ClickUp). Writes a row into the "Manual Outreach" tab via the API.
+async function manualAdd(type) {
+  if (!API_URL) { alert("API not connected"); return; }
+  const labels = { outreach: "Outreach", followup: "Follow-ups", reply: "New Contact Reply" };
+  const raw = prompt("Add to " + (labels[type] || type) + " for today — how many?", "1");
+  if (raw === null) return;
+  const count = parseInt(raw, 10);
+  if (isNaN(count) || count <= 0) { alert("Enter a positive number"); return; }
+
+  setRefreshStatus("loading");
+  try {
+    const res = await fetch(API_URL + "?action=addManual&type=" + encodeURIComponent(type) + "&count=" + count);
+    const j = await res.json();
+    if (!j.success) { alert("Error: " + (j.error || "unknown")); setRefreshStatus("error"); return; }
+    await fetchAutoData(true);   // re-pull fresh numbers (includes the new manual entry)
+  } catch (err) {
+    console.error("manualAdd error:", err);
+    alert("Network error: " + err);
+    setRefreshStatus("error");
+  }
+}
+
 // ============================================================
 // WEEK NAVIGATION
 // ============================================================
@@ -507,7 +540,7 @@ function render() {
   valRep.style.color = replies > 0 ? "#10b981" : "#cbd5e1";
 
   document.getElementById("subReplies").textContent =
-    outreach > 0 ? replies + " of " + outreach + " replied" : "replied same day";
+    outreach > 0 ? replies + " of " + outreach + " replied" : "new contact, same day";
 
   const valTotal = document.getElementById("valTotal");
   valTotal.textContent = total;
