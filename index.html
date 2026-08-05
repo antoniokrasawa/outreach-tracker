@@ -859,7 +859,8 @@ window.addEventListener("resize", function() { renderCharts(); });
 
 var KNOWN_STATUS_COLORS = {
   'connected': '#3b82f6', 'negotiation': '#f59e0b',
-  'to close': '#8b5cf6', 'registered': '#ec4899', 'launch': '#f97316',
+  'to close': '#8b5cf6', 'registered': '#ec4899',
+  'signing contract': '#f97316', 'launch': '#f97316',
   'active partner': '#10b981', 'hold': '#06b6d4', 'rejected': '#ef4444'
 };
 var HIDDEN_STATUSES = ['new', 'not relevant', 'no contact', 'contacted', 'tested not profitable', 'tested / not profitable', 'active another manager', 'active (another manager)', 'inactive', 'fraud'];
@@ -1150,7 +1151,7 @@ function getDisplayStatuses() {
     statuses = Object.keys(pipeData.snapshot || {});
   }
   if (statuses.length === 0) return [];
-  var order = ['connected', 'negotiation', 'to close', 'registered', 'launch', 'active partner', 'hold', 'rejected'];
+  var order = ['connected', 'negotiation', 'to close', 'registered', 'signing contract', 'launch', 'active partner', 'hold', 'rejected'];
   var snap = pipeData.snapshot || {};
   return statuses.filter(function(s) { return !isHiddenStatus(s); }).sort(function(a, b) {
     var ia = order.indexOf(a), ib = order.indexOf(b);
@@ -1222,7 +1223,7 @@ function renderPipeline() {
 
   // Get all statuses that appear in flows, sorted by display order (excluding hidden)
   var flowStatuses = Object.keys(flows).filter(function(s) { return !isHiddenStatus(s); });
-  var order = ['connected', 'negotiation', 'to close', 'registered', 'launch', 'active partner', 'hold', 'rejected'];
+  var order = ['connected', 'negotiation', 'to close', 'registered', 'signing contract', 'launch', 'active partner', 'hold', 'rejected'];
   flowStatuses.sort(function(a, b) {
     var ia = order.indexOf(a), ib = order.indexOf(b);
     if (ia === -1) ia = 100;
