@@ -50,7 +50,7 @@ canvas { display: block; }
 .refresh-dot.loading { background: #fbbf24; animation: pulse 1s infinite; }
 .refresh-dot.error { background: #fca5a5; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-/* Manual add controls on metric cards â€” subtle "+" that reveals a small input */
+/* Manual add controls on metric cards — subtle "+" that reveals a small input */
 .manual-row { margin-top: 6px; height: 20px; display: flex; align-items: center; justify-content: center; }
 .manual-plus {
   font-size: 15px; line-height: 1; padding: 0 4px;
@@ -155,7 +155,7 @@ canvas { display: block; }
 .flow-empty { text-align: center; padding: 30px 0; color: #cbd5e1; font-size: 12px; }
 .flow-info { font-size: 10px; color: #94a3b8; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
 
-/* Touches â€” Ð´Ð½ÐµÐ²Ð½Ð¾Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº Ð´Ð»Ñ Ð¾Ñ‚Ð¼ÐµÑ‚ÐºÐ¸ Ð² Ñ€Ð°Ð±Ð¾Ñ‡ÐµÐ¹ CRM */
+/* Touches — дневной список для отметки в рабочей CRM */
 .touch-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 18px 0 12px; }
 .touch-btn {
   border: 1px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 8px;
@@ -201,7 +201,7 @@ canvas { display: block; }
   <div class="tab-nav">
     <button class="tab-nav-btn active" onclick="switchTab('outreach')">Communications</button>
     <button class="tab-nav-btn" onclick="switchTab('pipeline')">Pipeline</button>
-    <button class="tab-nav-btn" onclick="switchTab('touches')">Ð”Ð»Ñ CRM</button>
+    <button class="tab-nav-btn" onclick="switchTab('touches')">Для CRM</button>
   </div>
 </div>
 
@@ -215,8 +215,8 @@ canvas { display: block; }
       <div class="metric-label">Outreach</div>
       <div class="metric-sub">cold contacts</div>
       <div class="manual-row">
-        <button class="manual-plus" id="pOutreach" onclick="manualShow('mOutreach','pOutreach')" title="Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ">+</button>
-        <input type="number" class="manual-inp" id="mOutreach" min="1" placeholder="ÐºÐ¾Ð»-Ð²Ð¾" style="display:none"
+        <button class="manual-plus" id="pOutreach" onclick="manualShow('mOutreach','pOutreach')" title="Добавить за сегодня">+</button>
+        <input type="number" class="manual-inp" id="mOutreach" min="1" placeholder="кол-во" style="display:none"
                onkeydown="manualKey(event,'outreach','mOutreach','pOutreach')" onblur="manualHide('mOutreach','pOutreach')">
       </div>
     </div>
@@ -225,8 +225,8 @@ canvas { display: block; }
       <div class="metric-label">Follow-ups</div>
       <div class="metric-sub" id="subFollowUps">existing leads</div>
       <div class="manual-row">
-        <button class="manual-plus" id="pFollowUps" onclick="manualShow('mFollowUps','pFollowUps')" title="Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ">+</button>
-        <input type="number" class="manual-inp" id="mFollowUps" min="1" placeholder="ÐºÐ¾Ð»-Ð²Ð¾" style="display:none"
+        <button class="manual-plus" id="pFollowUps" onclick="manualShow('mFollowUps','pFollowUps')" title="Добавить за сегодня">+</button>
+        <input type="number" class="manual-inp" id="mFollowUps" min="1" placeholder="кол-во" style="display:none"
                onkeydown="manualKey(event,'followup','mFollowUps','pFollowUps')" onblur="manualHide('mFollowUps','pFollowUps')">
       </div>
     </div>
@@ -235,8 +235,8 @@ canvas { display: block; }
       <div class="metric-label">New Contact Reply</div>
       <div class="metric-sub" id="subReplies">new contact, same day</div>
       <div class="manual-row">
-        <button class="manual-plus" id="pReplies" onclick="manualShow('mReplies','pReplies')" title="Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð·Ð° ÑÐµÐ³Ð¾Ð´Ð½Ñ">+</button>
-        <input type="number" class="manual-inp" id="mReplies" min="1" placeholder="ÐºÐ¾Ð»-Ð²Ð¾" style="display:none"
+        <button class="manual-plus" id="pReplies" onclick="manualShow('mReplies','pReplies')" title="Добавить за сегодня">+</button>
+        <input type="number" class="manual-inp" id="mReplies" min="1" placeholder="кол-во" style="display:none"
                onkeydown="manualKey(event,'reply','mReplies','pReplies')" onblur="manualHide('mReplies','pReplies')">
       </div>
     </div>
@@ -267,7 +267,7 @@ canvas { display: block; }
     <div class="stat-card">
       <div class="label">This week</div>
       <div id="statWeek" class="stat-val">0</div>
-      <div class="stat-sub" id="statWeekSub">Mon â€” Sun</div>
+      <div class="stat-sub" id="statWeekSub">Mon — Sun</div>
     </div>
     <div class="stat-card">
       <div class="label">Daily avg</div>
@@ -359,18 +359,18 @@ canvas { display: block; }
 <div class="wrap">
 
   <div class="touch-controls">
-    <button class="touch-btn active" id="tDayToday" onclick="setTouchDay(0)">Ð¡ÐµÐ³Ð¾Ð´Ð½Ñ</button>
-    <button class="touch-btn" id="tDayYesterday" onclick="setTouchDay(1)">Ð’Ñ‡ÐµÑ€Ð°</button>
+    <button class="touch-btn active" id="tDayToday" onclick="setTouchDay(0)">Сегодня</button>
+    <button class="touch-btn" id="tDayYesterday" onclick="setTouchDay(1)">Вчера</button>
     <input type="date" class="touch-date" id="touchDate" onchange="loadTouches(this.value)">
-    <button class="touch-btn" onclick="loadTouches(null, true)" title="ÐŸÐµÑ€ÐµÑ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ Ð¸Ð· ClickUp Ð¸ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹">â†»</button>
+    <button class="touch-btn" onclick="loadTouches(null, true)" title="Перечитать из ClickUp и таблицы">↻</button>
     <span class="touch-progress" id="touchProgress"></span>
   </div>
 
-  <div id="touchList"><div class="touch-empty">Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ°â€¦</div></div>
+  <div id="touchList"><div class="touch-empty">Загрузка…</div></div>
 
   <div class="flow-info" style="max-width:640px">
-    Ð¡Ð¿Ð¸ÑÐ¾Ðº = Ð½Ð¾Ð²Ñ‹Ð¹ Ð°ÑƒÑ‚Ñ€Ð¸Ñ‡ Ð¸Ð· Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ (Date contacted) + ÐºÐ°ÑÐ°Ð½Ð¸Ñ Ð¸Ð· ClickUp (Last Touch).
-    Â«ÐšÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒÂ» ÑÑ‚Ð°Ð²Ð¸Ñ‚ Ð³Ð°Ð»Ð¾Ñ‡ÐºÑƒ ÑÐ°Ð¼Ð¾ â€” Ð¾Ð½Ð° Ð¶Ð¸Ð²Ñ‘Ñ‚ Ð² ÑÑ‚Ð¾Ð¼ Ð±Ñ€Ð°ÑƒÐ·ÐµÑ€Ðµ, Ð¿Ð¾ Ð´Ð½ÑÐ¼.
+    Список = новый аутрич из таблицы (Date contacted) + касания из ClickUp (Last Touch).
+    «Копировать» ставит галочку само — она живёт в этом браузере, по дням.
   </div>
 
 </div>
@@ -533,7 +533,7 @@ async function fetchAutoData(forceRefresh) {
 
 // Manual add: a subtle "+" reveals a small number field. Enter submits, Esc /
 // clicking away hides it. Writes a row into the "Manual Outreach" tab via the API.
-// No prompt()/alert() â€” those are blocked inside the ClickUp iframe.
+// No prompt()/alert() — those are blocked inside the ClickUp iframe.
 function manualShow(inpId, plusId) {
   document.getElementById(plusId).style.display = "none";
   const inp = document.getElementById(inpId);
@@ -643,7 +643,7 @@ function render() {
   fill.style.width = pct + "%";
   fill.style.background = pct >= 100 ? "#10b981" : "linear-gradient(90deg,#6366f1,#8b5cf6)";
 
-  // Stats â€” current week (Mon-Sun)
+  // Stats — current week (Mon-Sun)
   const weekDays = getWeekDays(0);
   const daysUpToToday = weekDays.filter(d => d <= today);
   const weekTotal = daysUpToToday.reduce((s,d) => s + dayTotal(d), 0);
@@ -655,7 +655,7 @@ function render() {
   const monday = new Date(weekDays[0] + "T12:00:00");
   const sunday = new Date(weekDays[6] + "T12:00:00");
   document.getElementById("statWeekSub").textContent =
-    monday.toLocaleDateString("en",{day:"numeric",month:"short"}) + " â€” " +
+    monday.toLocaleDateString("en",{day:"numeric",month:"short"}) + " — " +
     sunday.toLocaleDateString("en",{day:"numeric",month:"short"});
 
   document.getElementById("statAvg").textContent = weekAvg;
@@ -667,7 +667,7 @@ function render() {
   const navMon = new Date(navDays[0] + "T12:00:00");
   const navSun = new Date(navDays[6] + "T12:00:00");
   document.getElementById("weekLabel").textContent = weekOffset === 0 ? "This week" :
-    navMon.toLocaleDateString("en",{day:"numeric",month:"short"}) + " â€” " +
+    navMon.toLocaleDateString("en",{day:"numeric",month:"short"}) + " — " +
     navSun.toLocaleDateString("en",{day:"numeric",month:"short"});
   document.getElementById("weekNext").disabled = weekOffset >= 0;
 
@@ -740,12 +740,12 @@ function renderBar() {
       const fuH = (fuV/maxVal)*chartH;
       const repH = (replyV/maxVal)*chartH;
 
-      // Stack from bottom: other â†’ outreach â†’ follow-ups â†’ replies
+      // Stack from bottom: other → outreach → follow-ups → replies
       const otherV = Math.max(0, totalV - outV - fuV - replyV);
       const otherH = (otherV/maxVal)*chartH;
       let curY = padT + chartH; // start at bottom
 
-      // Bottom: Other contacts (light gray â€” inbound, conference, etc.)
+      // Bottom: Other contacts (light gray — inbound, conference, etc.)
       if (otherV > 0) {
         const segTop = curY - otherH;
         ctx.fillStyle = isToday ? "#94a3b8" : "#cbd5e1";
@@ -917,7 +917,7 @@ var KNOWN_STATUS_COLORS = {
   'to close': '#8b5cf6', 'registered': '#ec4899',
   'signing contract': '#f97316', 'launch': '#f97316',
   'active partner': '#10b981', 'hold': '#06b6d4',
-  'no autonomo': '#64748b',  // Ð³Ð¾Ñ‚Ð¾Ð² Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ, Ð½Ð¾ Ð½ÐµÑ‚ autÃ³nomo/ÐºÐ¾Ð¼Ð¿Ð°Ð½Ð¸Ð¸ â€” Ð·Ð°Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½, Ð½Ðµ Ð¾Ñ‚ÐºÐ°Ð·
+  'no autonomo': '#64748b',  // готов работать, но нет autónomo/компании — заблокирован, не отказ
   'rejected': '#ef4444'
 };
 var HIDDEN_STATUSES = ['new', 'not relevant', 'no contact', 'contacted', 'tested not profitable', 'tested / not profitable', 'active another manager', 'active (another manager)', 'another manager', 'inactive', 'fraud'];
@@ -944,7 +944,7 @@ function switchTab(tab) {
 }
 
 // ============================================================
-// TOUCHES: Ð´Ð½ÐµÐ²Ð½Ð¾Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº Ð´Ð»Ñ Ð¿Ð¾ÑˆÑ‚ÑƒÑ‡Ð½Ð¾Ð¹ Ð¾Ñ‚Ð¼ÐµÑ‚ÐºÐ¸ Ð² Ñ€Ð°Ð±Ð¾Ñ‡ÐµÐ¹ CRM
+// TOUCHES: дневной список для поштучной отметки в рабочей CRM
 // ============================================================
 
 var touchState = { date: null, items: [], loadedFor: null, loading: false, fromSnapshot: false };
@@ -959,7 +959,7 @@ function setTouchDay(daysAgo) {
   loadTouches(touchDateStr(daysAgo));
 }
 
-// ÐžÑ‚Ð¼ÐµÑ‚ÐºÐ¸ Ð¶Ð¸Ð²ÑƒÑ‚ Ð¿Ð¾ Ð´Ð½ÑÐ¼: Ð²Ñ‡ÐµÑ€Ð°ÑˆÐ½Ð¸Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº, Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ñ‹Ð¹ ÑÐµÐ³Ð¾Ð´Ð½Ñ, Ð¿Ð¾Ð¼Ð½Ð¸Ñ‚ ÑÐ²Ð¾Ñ‘.
+// Отметки живут по дням: вчерашний список, открытый сегодня, помнит своё.
 function touchDoneKey(date) { return 'touches-done-' + date; }
 
 function touchDoneSet(date) {
@@ -989,7 +989,7 @@ async function loadTouches(dateStr, force) {
 
   touchState.loading = true;
   document.getElementById('touchList').innerHTML =
-    '<div class="touch-empty">Ð§Ð¸Ñ‚Ð°ÑŽ ClickUp Ð¸ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñƒ, ÑÑ‚Ð¾ ~30 ÑÐµÐºÑƒÐ½Ð´â€¦</div>';
+    '<div class="touch-empty">Читаю ClickUp и таблицу, это ~30 секунд…</div>';
   document.getElementById('touchProgress').textContent = '';
 
   try {
@@ -1003,7 +1003,7 @@ async function loadTouches(dateStr, force) {
     touchState.items = [];
     touchState.loadedFor = null;
     document.getElementById('touchList').innerHTML =
-      '<div class="touch-empty">ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð·Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ: ' + String(err.message || err) + '</div>';
+      '<div class="touch-empty">Не удалось загрузить: ' + String(err.message || err) + '</div>';
     touchState.loading = false;
     return;
   }
@@ -1017,7 +1017,7 @@ function renderTouches() {
   var items = touchState.items;
 
   if (!items.length) {
-    box.innerHTML = '<div class="touch-empty">Ð—Ð° ÑÑ‚Ð¾Ñ‚ Ð´ÐµÐ½ÑŒ ÐºÐ°ÑÐ°Ð½Ð¸Ð¹ Ð½Ðµ Ð½Ð°ÑˆÐ»Ð¾ÑÑŒ</div>';
+    box.innerHTML = '<div class="touch-empty">За этот день касаний не нашлось</div>';
     renderTouchProgress();
     return;
   }
@@ -1029,18 +1029,18 @@ function renderTouches() {
     var isDone = done.indexOf(it.name) !== -1;
     var link = it.link || '';
     var tagClass = it.source === 'both' ? 'both' : (it.source === 'clickup' ? 'clickup' : 'sheet');
-    var tagText = it.source === 'both' ? 'Ð¾Ð±Ðµ' : (it.source === 'clickup' ? 'ClickUp' : 'Ð»Ð¸ÑÑ‚');
+    var tagText = it.source === 'both' ? 'обе' : (it.source === 'clickup' ? 'ClickUp' : 'лист');
 
     html += '<div class="touch-row' + (isDone ? ' done' : '') + '" id="trow' + idx + '">'
       + '<input type="checkbox" class="touch-check"' + (isDone ? ' checked' : '')
       + ' onchange="toggleTouch(' + idx + ', this.checked)">'
       + '<div class="touch-main">'
       + '<div class="touch-name">' + esc(it.name) + '</div>'
-      + '<div class="touch-link">' + (link ? esc(link) : 'ÑÑÑ‹Ð»ÐºÐ¸ Ð½ÐµÑ‚ â€” Ð¸Ñ‰Ð¸ Ð¿Ð¾ Ð¸Ð¼ÐµÐ½Ð¸') + '</div>'
+      + '<div class="touch-link">' + (link ? esc(link) : 'ссылки нет — ищи по имени') + '</div>'
       + '</div>'
       + '<div class="touch-tags"><span class="touch-tag ' + tagClass + '">' + tagText + '</span></div>'
       + '<button class="touch-copy" id="tcopy' + idx + '" onclick="copyTouch(' + idx + ')"'
-      + (link ? '' : ' disabled') + '>ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ</button>'
+      + (link ? '' : ' disabled') + '>копировать</button>'
       + '</div>';
   });
 
@@ -1051,10 +1051,10 @@ function renderTouches() {
 function renderTouchProgress() {
   var total = touchState.items.length;
   var done = touchDoneSet(touchState.date).length;
-  var txt = total ? ('Ð¾Ñ‚Ð¼ÐµÑ‡ÐµÐ½Ð¾ ' + Math.min(done, total) + ' Ð¸Ð· ' + total) : '';
-  // ÐŸÑ€Ð¾ÑˆÐ»Ñ‹Ð¹ Ð´ÐµÐ½ÑŒ Ñ‡ÐµÑÑ‚ÐµÐ½ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¿Ð¾ ÑÐ½Ð¸Ð¼ÐºÑƒ: Last Touch Ð² ClickUp Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ Ð»Ð¸ÑˆÑŒ
-  // Ð¿Ð¾ÑÐ»ÐµÐ´Ð½ÐµÐµ ÐºÐ°ÑÐ°Ð½Ð¸Ðµ, Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð½Ð¾ Ñ‚Ñ€Ð¾Ð½ÑƒÑ‚Ñ‹Ð¹ Ð¿Ð°Ñ€Ñ‚Ð½Ñ‘Ñ€ Ð¸Ð· Ð¶Ð¸Ð²Ð¾Ð³Ð¾ ÑÐºÐ°Ð½Ð° Ð²Ñ‹Ð¿Ð°Ð´Ð°ÐµÑ‚.
-  if (total && touchState.fromSnapshot) txt += ' Â· Ð¿Ð¾ ÑÐ½Ð¸Ð¼ÐºÑƒ Ð´Ð½Ñ';
+  var txt = total ? ('отмечено ' + Math.min(done, total) + ' из ' + total) : '';
+  // Прошлый день честен только по снимку: Last Touch в ClickUp хранит лишь
+  // последнее касание, повторно тронутый партнёр из живого скана выпадает.
+  if (total && touchState.fromSnapshot) txt += ' · по снимку дня';
   document.getElementById('touchProgress').textContent = txt;
 }
 
@@ -1066,8 +1066,8 @@ function toggleTouch(idx, checked) {
   if (row) row.classList.toggle('done', checked);
 }
 
-// ÐšÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ = Â«Ð±ÐµÑ€Ñƒ ÐµÐ³Ð¾ ÑÐµÐ¹Ñ‡Ð°ÑÂ», Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ ÑÑ€Ð°Ð·Ñƒ ÑÑ‚Ð°Ð²Ð¸Ñ‚ Ð³Ð°Ð»Ð¾Ñ‡ÐºÑƒ:
-// Ð¾Ð´Ð¸Ð½ ÐºÐ»Ð¸Ðº Ð½Ð° Ð¿Ð°Ñ€Ñ‚Ð½Ñ‘Ñ€Ð° Ð²Ð¼ÐµÑÑ‚Ð¾ Ð´Ð²ÑƒÑ…. Ð¡Ð½ÑÑ‚ÑŒ Ð¼Ð¾Ð¶Ð½Ð¾ Ñ‡ÐµÐºÐ±Ð¾ÐºÑÐ¾Ð¼.
+// Копирование = «беру его сейчас», поэтому сразу ставит галочку:
+// один клик на партнёра вместо двух. Снять можно чекбоксом.
 async function copyTouch(idx) {
   var it = touchState.items[idx];
   if (!it || !it.link) return;
@@ -1077,8 +1077,8 @@ async function copyTouch(idx) {
     await navigator.clipboard.writeText(it.link);
     ok = true;
   } catch (e) {
-    // Clipboard API Ð¿Ñ€Ð¾ÑÐ¸Ñ‚ Ð·Ð°Ñ‰Ð¸Ñ‰Ñ‘Ð½Ð½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚ÐµÐºÑÑ‚ Ð¸ Ñ€Ð°Ð·Ñ€ÐµÑˆÐµÐ½Ð¸Ðµ â€” ÐµÑÐ»Ð¸ Ð½Ðµ Ð´Ð°Ð»Ð¸,
-    // Ð¾ÑÑ‚Ð°Ñ‘Ñ‚ÑÑ ÑÑ‚Ð°Ñ€Ñ‹Ð¹ Ð¿ÑƒÑ‚ÑŒ Ñ‡ÐµÑ€ÐµÐ· Ð½ÐµÐ²Ð¸Ð´Ð¸Ð¼Ð¾Ðµ Ð¿Ð¾Ð»Ðµ.
+    // Clipboard API просит защищённый контекст и разрешение — если не дали,
+    // остаётся старый путь через невидимое поле.
     try {
       var ta = document.createElement('textarea');
       ta.value = it.link;
@@ -1093,16 +1093,16 @@ async function copyTouch(idx) {
 
   var btn = document.getElementById('tcopy' + idx);
   if (!ok) {
-    if (btn) btn.textContent = 'Ð½Ðµ Ð²Ñ‹ÑˆÐ»Ð¾';
-    setTimeout(function() { if (btn) btn.textContent = 'ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ'; }, 1500);
+    if (btn) btn.textContent = 'не вышло';
+    setTimeout(function() { if (btn) btn.textContent = 'копировать'; }, 1500);
     return;
   }
 
   if (btn) {
-    btn.textContent = 'ÑÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¾';
+    btn.textContent = 'скопировано';
     btn.classList.add('copied');
     setTimeout(function() {
-      if (btn) { btn.textContent = 'ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ'; btn.classList.remove('copied'); }
+      if (btn) { btn.textContent = 'копировать'; btn.classList.remove('copied'); }
     }, 1200);
   }
 
@@ -1296,7 +1296,7 @@ function getSnapshotPair(periodStartMs, periodEndMs) {
   return { start: startSnap, end: endSnap };
 }
 
-// Compute per-status flows from snapshot pair â€” all statuses, no filtering
+// Compute per-status flows from snapshot pair — all statuses, no filtering
 function computeFlows(pair) {
   if (!pair) return null;
 
