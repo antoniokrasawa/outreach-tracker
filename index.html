@@ -185,6 +185,7 @@ canvas { display: block; }
 }
 .touch-copy:hover { border-color: #6366f1; color: #6366f1; }
 .touch-copy.copied { background: #dcfce7; border-color: #86efac; color: #059669; }
+.touch-copy.alt { padding: 5px 9px; font-size: 10px; color: #94a3b8; }
 .touch-copy:disabled { opacity: 0.4; cursor: not-allowed; }
 .touch-empty { text-align: center; padding: 34px 0; color: #cbd5e1; font-size: 12px; }
 </style>
@@ -1032,6 +1033,15 @@ function renderTouches() {
     var tagClass = it.source === 'both' ? 'both' : (it.source === 'clickup' ? 'clickup' : 'sheet');
     var tagText = it.source === 'both' ? 'обе' : (it.source === 'clickup' ? 'ClickUp' : 'лист');
 
+    // Вторая кнопка появляется, только когда есть и сайт, и контакт, и основная
+    // ссылка — не та, что нужна прямо сейчас. Выбор по типу верен не всегда.
+    var alt = '';
+    var altLabel = '';
+    if (it.site && it.contact) {
+      if (link === it.site) { alt = it.contact; altLabel = 'контакт'; }
+      else if (link === it.contact) { alt = it.site; altLabel = 'сайт'; }
+    }
+
     html += '<div class="touch-row' + (isDone ? ' done' : '') + '" id="trow' + idx + '">'
       + '<input type="checkbox" class="touch-check"' + (isDone ? ' checked' : '')
       + ' onchange="toggleTouch(' + idx + ', this.checked)">'
@@ -1040,6 +1050,8 @@ function renderTouches() {
       + '<div class="touch-link">' + (link ? esc(link) : 'ссылки нет — ищи по имени') + '</div>'
       + '</div>'
       + '<div class="touch-tags"><span class="touch-tag ' + tagClass + '">' + tagText + '</span></div>'
+      + (alt ? '<button class="touch-copy alt" id="talt' + idx + '" onclick="copyTouch(' + idx + ', true)"'
+             + ' title="' + esc(alt) + '">' + altLabel + '</button>' : '')
       + '<button class="touch-copy" id="tcopy' + idx + '" onclick="copyTouch(' + idx + ')"'
       + (link ? '' : ' disabled') + '>копировать</button>'
       + '</div>';
@@ -1069,20 +1081,24 @@ function toggleTouch(idx, checked) {
 
 // Копирование = «беру его сейчас», поэтому сразу ставит галочку:
 // один клик на партнёра вместо двух. Снять можно чекбоксом.
-async function copyTouch(idx) {
+async function copyTouch(idx, useAlt) {
   var it = touchState.items[idx];
-  if (!it || !it.link) return;
+  if (!it) return;
+
+  var value = it.link;
+  if (useAlt) value = (it.link === it.site) ? it.contact : it.site;
+  if (!value) return;
 
   var ok = false;
   try {
-    await navigator.clipboard.writeText(it.link);
+    await navigator.clipboard.writeText(value);
     ok = true;
   } catch (e) {
     // Clipboard API просит защищённый контекст и разрешение — если не дали,
     // остаётся старый путь через невидимое поле.
     try {
       var ta = document.createElement('textarea');
-      ta.value = it.link;
+      ta.value = value;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
@@ -1092,10 +1108,11 @@ async function copyTouch(idx) {
     } catch (e2) { ok = false; }
   }
 
-  var btn = document.getElementById('tcopy' + idx);
+  var btn = document.getElementById((useAlt ? 'talt' : 'tcopy') + idx);
+  var label = btn ? btn.textContent : '';
   if (!ok) {
     if (btn) btn.textContent = 'не вышло';
-    setTimeout(function() { if (btn) btn.textContent = 'копировать'; }, 1500);
+    setTimeout(function() { if (btn) btn.textContent = label; }, 1500);
     return;
   }
 
@@ -1103,7 +1120,7 @@ async function copyTouch(idx) {
     btn.textContent = 'скопировано';
     btn.classList.add('copied');
     setTimeout(function() {
-      if (btn) { btn.textContent = 'копировать'; btn.classList.remove('copied'); }
+      if (btn) { btn.textContent = label; btn.classList.remove('copied'); }
     }, 1200);
   }
 
