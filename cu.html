@@ -96,6 +96,25 @@
   var web = 'https://app.clickup.com/t/' + id;
   taskEl.textContent = id;
 
+  // iPadOS выдаёт себя за Mac, поэтому отдельно смотрим на тач.
+  var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isMobile) {
+    // На телефоне схемы clickup:// нет: своей схемы у мобильных приложений ClickUp
+    // не заявлено, они перехватывают обычные https-ссылки на app.clickup.com
+    // (Universal Links на iOS, App Links на Android).
+    //
+    // И тут нельзя переадресовывать скриптом: и iOS, и Android отдают такую
+    // ссылку приложению только по НАСТОЯЩЕМУ тапу, а при location.replace
+    // открывают её в браузере. Поэтому вместо переадресации — крупная кнопка.
+    title.textContent = 'Открыть задачу';
+    hint.textContent = 'Нажми кнопку — система передаст ссылку приложению ClickUp.';
+    actions.innerHTML =
+      '<a class="btn" href="' + web + '">Открыть в ClickUp</a>';
+    return;
+  }
+
   actions.innerHTML =
     '<a class="btn" href="' + deep + '">Открыть в приложении</a>' +
     '<a class="btn alt" href="' + web + '" target="_blank" rel="noopener">Открыть в браузере</a>';
