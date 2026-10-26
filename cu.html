@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClickUp</title>
+<!--
+  Передача ссылки на задачу в ДЕСКТОПНЫЙ ClickUp.
+
+  Зачем нужна прослойка: Telegram Bot API принимает в ссылках только http/https/tg
+  и отклоняет нестандартные схемы, поэтому положить clickup:// прямо в сообщение
+  бота нельзя. А десктопное приложение открывается только по своей схеме —
+  https-ссылку на app.clickup.com Windows всегда отдаёт браузеру (Electron не может
+  забрать себе домен).
+
+  Формат схемы подтверждён логом приложения 26.10.2026:
+    argv: ClickUp.exe clickup://t/124306n172u
+    (protocol) Received deeplink: t/124306n172u
+
+  Открытым редиректом страница не становится: из параметра берутся только буквы,
+  цифры, дефис и подчёркивание, а адрес собирается здесь, а не приходит извне.
+-->
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #0f172a;
+    --muted: #64748b;
+    --accent: #6366f1;
+    --card: #ffffff;
+    --border: #e2e8f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8;
+      --accent: #818cf8; --card: #1e283b; --border: #334155;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8;
+    --accent: #818cf8; --card: #1e283b; --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--fg);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 24px; max-width: 420px; width: 100%; text-align: center;
+  }
+  h1 { font-size: 17px; margin: 0 0 6px; font-weight: 600; }
+  p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+  .task { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 13px; color: var(--muted); }
+  a.btn {
+    display: inline-block; padding: 9px 16px; border-radius: 9px;
+    background: var(--accent); color: #fff; text-decoration: none;
+    font-size: 14px; font-weight: 500; margin: 0 4px 8px;
+  }
+  a.alt { background: transparent; color: var(--accent);
+          border: 1px solid var(--border); }
+  .err { color: #dc2626; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <h1 id="title">Открываю в ClickUp…</h1>
+  <p id="hint">Если приложение не открылось, нажми кнопку ниже.</p>
+  <div id="actions"></div>
+  <div class="task" id="task"></div>
+</div>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var raw = params.get('t') || location.hash.replace(/^#/, '');
+  // Идентификатор задачи ClickUp — только эти символы. Всё остальное отбрасываем,
+  // чтобы страница не превратилась в открытый редирект на произвольную схему.
+  var id = (raw || '').trim();
+  var ok = /^[A-Za-z0-9_-]{4,64}$/.test(id);
+
+  var title = document.getElementById('title');
+  var hint = document.getElementById('hint');
+  var actions = document.getElementById('actions');
+  var taskEl = document.getElementById('task');
+
+  if (!ok) {
+    title.textContent = 'Нет номера задачи';
+    title.className = 'err';
+    hint.textContent = 'Ссылка должна выглядеть так: cu.html?t=124306n172u';
+    return;
+  }
+
+  var deep = 'clickup://t/' + id;
+  var web = 'https://app.clickup.com/t/' + id;
+  taskEl.textContent = id;
+
+  actions.innerHTML =
+    '<a class="btn" href="' + deep + '">Открыть в приложении</a>' +
+    '<a class="btn alt" href="' + web + '" target="_blank" rel="noopener">Открыть в браузере</a>';
+
+  // Передаём сразу. replace, а не assign: иначе «назад» возвращает на эту же
+  // страницу и она передаёт снова по кругу.
+  try { location.replace(deep); } catch (e) {}
+
+  // Закрыть вкладку получается только если её открыл скрипт; обычно браузер
+  // откажет — тогда просто меняем текст, чтобы страница не выглядела зависшей.
+  setTimeout(function () {
+    try { window.close(); } catch (e) {}
+    title.textContent = 'Передано в ClickUp';
+    hint.textContent = 'Вкладку можно закрыть. Если приложение не открылось — кнопки ниже.';
+  }, 1200);
+})();
+</script>
+</body>
+</html>
