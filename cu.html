@@ -92,8 +92,15 @@
     return;
   }
 
-  var deep = 'clickup://t/' + id;
-  var web = 'https://app.clickup.com/t/' + id;
+  // Идентификатор рабочего пространства, если передан. Без него десктоп открывает
+  // карточку задачи поверх пустоты: подложке нечего грузить, и она крутит
+  // вечный спиннер. С ним приложение знает, какой воркспейс поднимать.
+  var wsRaw = (params.get('w') || '').trim();
+  var ws = /^[0-9]{4,20}$/.test(wsRaw) ? wsRaw : '';
+  var path = ws ? ws + '/' + id : id;
+
+  var deep = 'clickup://t/' + path;
+  var web = 'https://app.clickup.com/t/' + path;
   taskEl.textContent = id;
 
   // iPadOS выдаёт себя за Mac, поэтому отдельно смотрим на тач.
